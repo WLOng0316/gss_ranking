@@ -3,199 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GSS | WTT RANKING SYSTEM V7 CLOUD</title>
+    <title>GSS | WTT RANKING SYSTEM V7.3</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GSS Ranking">
-    <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22GSS%20Ranking%22,%22short_name%22:%22GSS%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23030508%22,%22theme_color%22:%22%23030508%22}">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,900&family=Barlow:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-          --blue: #00d4ff; --blue-dim: #00aacc; --gold: #ffd700; --silver: #b8c4ce; --bronze: #cd7f32;
-          --red: #ff3b3b; --green: #00e676; --bg: #030508; --card: #0b0d12; --card2: #0f1219;
-          --line: #141820; --line2: #1c2230; --text: #e8edf5; --muted: #3a4558; --muted2: #5a6a80;
-        }
+        :root { --blue: #00d4ff; --gold: #ffd700; --silver: #b8c4ce; --bronze: #cd7f32; --red: #ff3b3b; --green: #00e676; --bg: #030508; --card: #0b0d12; --line2: #1c2230; --text: #e8edf5; --muted: #3a4558; --muted2: #5a6a80; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; min-height: 100vh; overflow-x: hidden; }
+        body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
         header { padding: 50px 20px 14px; background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--line2); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 200; backdrop-filter: blur(20px); }
-        .logo-gss { font-family: 'Barlow Condensed', sans-serif; font-size: 38px; font-weight: 900; font-style: italic; color: #fff; line-height: 1; }
-        .ver-tag { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--muted); border: 1px solid var(--line2); padding: 3px 7px; border-radius: 2px; }
-        .page { display: none; animation: fadeUp 0.25s ease; }
+        .logo-gss { font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 900; font-style: italic; color: #fff; }
+        .page { display: none; animation: fadeUp 0.2s ease; }
         .page.active { display: block; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        nav { position: fixed; bottom: 0; width: 100%; background: rgba(3,5,8,0.97); display: flex; border-top: 1px solid var(--line2); padding: 12px 0 28px; z-index: 200; backdrop-filter: blur(20px); }
-        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        nav { position: fixed; bottom: 0; width: 100%; background: rgba(3,5,8,0.97); display: flex; border-top: 1px solid var(--line2); padding: 12px 0 25px; z-index: 200; }
+        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
         .nav-tab.active { color: var(--blue); }
-        .sec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 4px; color: var(--muted); text-transform: uppercase; padding: 20px 20px 10px; display: flex; align-items: center; gap: 10px; }
+        .sec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; padding: 20px; display: flex; align-items: center; gap: 10px; }
         .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--line2); }
-        .group-tabs { display: flex; gap: 6px; padding: 0 20px 15px; overflow-x: auto; scrollbar-width: none; }
-        .g-tab { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; padding: 7px 14px; border-radius: 2px; cursor: pointer; border: 1px solid var(--line2); color: var(--muted2); background: var(--card); }
-        .g-tab.active { background: var(--blue); color: #000; border-color: var(--blue); font-weight: 900; }
-        .rank-list { padding: 0 16px; display: flex; flex-direction: column; gap: 6px; }
-        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 6px; display: flex; align-items: center; padding: 12px 14px; cursor: pointer; position: relative; }
-        .rank-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--muted); }
-        .rank-card.r1::before { background: var(--gold); }
-        .r-num { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; width: 36px; color: var(--muted); }
-        .r-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--line2); margin-right: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; color: var(--muted); }
+        .group-tabs { display: flex; gap: 8px; padding: 0 20px 15px; overflow-x: auto; }
+        .g-tab { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; padding: 6px 12px; border-radius: 3px; border: 1px solid var(--line2); background: var(--card); color: var(--muted2); }
+        .g-tab.active { background: var(--blue); color: #000; font-weight: 900; border-color: var(--blue); }
+        .rank-list { padding: 0 16px; }
+        .rank-card { background: var(--card); border: 1px solid #141820; border-radius: 6px; display: flex; align-items: center; padding: 12px; margin-bottom: 6px; position: relative; }
+        .r-num { width: 30px; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; color: var(--muted); }
         .r-info { flex: 1; }
         .r-name { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; text-transform: uppercase; }
-        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: #fff; line-height: 1; }
-        .form-wrap { padding: 16px; }
-        .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line2); color: var(--text); padding: 12px; border-radius: 4px; margin-bottom: 10px; }
-        .btn-primary { width: 100%; background: var(--blue); color: #000; border: none; padding: 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; }
-        .danger-btn { background: rgba(255,59,59,0.1); color: var(--red); border: 1px solid rgba(255,59,59,0.3); padding: 6px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; }
-        .match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--card); margin-bottom: 5px; border-radius: 4px; }
-        .undo-btn { color: var(--red); font-size: 18px; cursor: pointer; padding: 0 10px; }
-        .pts-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .pts-table td { padding: 12px 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 12px 24px; border-radius: 100px; font-weight: 900; opacity: 0; transition: 0.3s; z-index: 1000; }
+        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: #fff; }
+        .event-card { background: var(--card); border: 1px solid var(--line2); border-left: 3px solid var(--blue); border-radius: 6px; padding: 15px; margin: 0 16px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .form-wrap { padding: 0 16px 16px; }
+        .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line2); color: #fff; padding: 12px; border-radius: 4px; margin-bottom: 10px; }
+        .btn-primary { width: 100%; background: var(--blue); color: #000; border: none; padding: 15px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; border-radius: 4px; }
+        .match-row { display: flex; justify-content: space-between; padding: 10px; background: var(--card); border-radius: 4px; margin-bottom: 5px; border: 1px solid var(--line2); font-size: 13px; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: 900; opacity: 0; transition: 0.3s; z-index: 999; }
         .toast.show { opacity: 1; }
+        .danger-text { color: var(--red); font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-gss">GSS</div>
-  <div class="ver-tag">V7.2 CLOUD ADMIN</div>
-</header>
+<header><div class="logo-gss">GSS</div><div style="font-family:'Share Tech Mono'; font-size:9px; color:var(--muted)">V7.3 CLOUD</div></header>
 
 <div id="pg-ranking" class="page active">
-  <div class="sec-title">Live Rankings</div>
-  <div class="group-tabs" id="groupTabs"></div>
-  <div class="rank-list" id="rankList"></div>
+    <div class="sec-title">Rankings</div>
+    <div class="group-tabs" id="groupTabs"></div>
+    <div class="rank-list" id="rankList"></div>
+</div>
+
+<div id="pg-events" class="page">
+    <div class="sec-title">Tournament Schedule</div>
+    <div id="eventList"></div>
 </div>
 
 <div id="pg-match" class="page">
-  <div class="sec-title">Record Match</div>
-  <div class="form-wrap">
-    <select id="wSel" class="wtt-select"></select>
-    <select id="lSel" class="wtt-select"></select>
-    <button class="btn-primary" onclick="submitMatch()">Submit Result</button>
-  </div>
-  <div class="sec-title">Recent History (Tap ✕ to Undo)</div>
-  <div id="recentMatches" style="padding: 0 16px;"></div>
+    <div class="sec-title">New Match</div>
+    <div class="form-wrap">
+        <select id="wSel" class="wtt-select"></select>
+        <select id="lSel" class="wtt-select"></select>
+        <button class="btn-primary" onclick="submitMatch()">Submit Result</button>
+    </div>
+    <div class="sec-title">Recent History (Tap X to Undo)</div>
+    <div id="recentMatches" style="padding: 0 16px;"></div>
 </div>
 
 <div id="pg-coach" class="page">
-  <div class="sec-title">Admin Panel</div>
-  <div class="form-wrap">
-    <input type="text" id="newName" class="wtt-input" placeholder="New Athlete Name">
-    <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
-    <button class="btn-primary" onclick="addPlayer()">Register Athlete</button>
-  </div>
-  <div class="sec-title">Manage Players</div>
-  <div id="athleteManage" class="form-wrap"></div>
+    <div class="sec-title">Admin: Register Player</div>
+    <div class="form-wrap">
+        <input type="text" id="newName" class="wtt-input" placeholder="Player Name">
+        <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
+        <button class="btn-primary" onclick="addPlayer()">Add Player</button>
+    </div>
+    <div class="sec-title">Admin: Add Event</div>
+    <div class="form-wrap">
+        <input type="text" id="evName" class="wtt-input" placeholder="Event Name">
+        <input type="text" id="evDate" class="wtt-input" placeholder="Date (e.g. 15 Oct)">
+        <button class="btn-primary" onclick="addEvent()">Post Event</button>
+    </div>
+    <div class="sec-title">Management</div>
+    <div id="adminList" class="form-wrap"></div>
 </div>
 
 <nav>
-  <div class="nav-tab active" onclick="tab('ranking', this)">🏆 Ranking</div>
-  <div class="nav-tab" onclick="tab('match', this)">⚡ Match</div>
-  <div class="nav-tab" onclick="tab('coach', this)">🔐 Coach</div>
+    <div class="nav-tab active" onclick="tab('ranking', this)">Ranking</div>
+    <div class="nav-tab" onclick="tab('events', this)">Events</div>
+    <div class="nav-tab" onclick="tab('match', this)">Match</div>
+    <div class="nav-tab" onclick="tab('coach', this)">Admin</div>
 </nav>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══ CONFIG ═══
 const firebaseConfig = {
-  apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
-  authDomain: "gss-ranking.firebaseapp.com",
-  databaseURL: "https://gss-ranking-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "gss-ranking",
-  storageBucket: "gss-ranking.firebasestorage.app",
-  messagingSenderId: "975136802534",
-  appId: "1:975136802534:web:11d41775792dc3d1fa5d27"
+    apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
+    authDomain: "gss-ranking.firebaseapp.com",
+    databaseURL: "https://gss-ranking-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "gss-ranking",
+    storageBucket: "gss-ranking.firebasestorage.app",
+    messagingSenderId: "975136802534",
+    appId: "1:975136802534:web:11d41775792dc3d1fa5d27"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let players = [];
-let logs = [];
-let currentGroup = 'All';
+let players = [], logs = [], events = [], currentGroup = 'All';
 
-// ═══ DATA SYNC ═══
 function initData() {
     db.ref('players').on('value', snap => {
-        const val = snap.val();
-        players = val ? Object.values(val) : [];
-        renderRanking();
-        renderCoachPanel();
-        updateSelects();
+        players = snap.val() ? Object.values(snap.val()) : [];
+        renderRanking(); updateSelects(); renderAdmin();
     });
     db.ref('logs').on('value', snap => {
-        const val = snap.val();
-        logs = val ? Object.entries(val).map(([id, data]) => ({id, ...data})) : [];
-        renderRecentMatches();
+        logs = snap.val() ? Object.entries(snap.val()).map(([id, data]) => ({id, ...data})) : [];
+        renderMatches();
+    });
+    db.ref('events').on('value', snap => {
+        events = snap.val() ? Object.entries(snap.val()).map(([id, data]) => ({id, ...data})) : [];
+        renderEvents();
     });
 }
 
-function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-// ═══ CORE FUNCTIONS ═══
-function addPlayer() {
-    const name = document.getElementById('newName').value.trim();
-    const group = document.getElementById('newGroup').value;
-    if(!name) return;
-    db.ref('players/' + name.replace(/\./g, '_')).set({ name, group, rating: 1000 });
-    document.getElementById('newName').value = '';
-    toast('Player Added');
-}
-
-function deletePlayer(name) {
-    if(!confirm(`Delete ${name}? Data will be lost.`)) return;
-    db.ref('players/' + name.replace(/\./g, '_')).remove();
-    toast('Player Removed');
-}
-
-function submitMatch() {
-    const wn = document.getElementById('wSel').value;
-    const ln = document.getElementById('lSel').value;
-    if(!wn || !ln || wn === ln) return;
-
-    const w = players.find(p => p.name === wn);
-    const l = players.find(p => p.name === ln);
-    const exp = 1 / (1 + Math.pow(10, (l.rating - w.rating) / 400));
-    const diff = Math.round(32 * (1 - exp));
-
-    // Update Scores
-    db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
-    db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
-    
-    // Log Match
-    db.ref('logs').push({ w: wn, l: ln, diff, ts: Date.now() });
-    toast('Result Saved');
-}
-
-function undoMatch(logId) {
-    const match = logs.find(l => l.id === logId);
-    if(!match || !confirm('Undo this match and revert scores?')) return;
-
-    const winner = players.find(p => p.name === match.w);
-    const loser = players.find(p => p.name === match.l);
-
-    if(winner && loser) {
-        db.ref('players/' + match.w.replace(/\./g, '_')).update({ rating: winner.rating - match.diff });
-        db.ref('players/' + match.l.replace(/\./g, '_')).update({ rating: loser.rating + match.diff });
-    }
-    
-    db.ref('logs/' + logId).remove();
-    toast('Match Undone');
-}
-
-// ═══ RENDER ═══
 function tab(id, el) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
@@ -203,49 +136,83 @@ function tab(id, el) {
     el.classList.add('active');
 }
 
+function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+// --- PLAYERS ---
+function addPlayer() {
+    const n = document.getElementById('newName').value.trim();
+    if(!n) return;
+    db.ref('players/' + n.replace(/\./g, '_')).set({ name: n, group: document.getElementById('newGroup').value, rating: 1000 });
+    document.getElementById('newName').value = ''; toast('Player Added');
+}
+
+// --- EVENTS ---
+function addEvent() {
+    const name = document.getElementById('evName').value.trim();
+    const date = document.getElementById('evDate').value.trim();
+    if(!name || !date) return;
+    db.ref('events').push({ name, date });
+    document.getElementById('evName').value = ''; document.getElementById('evDate').value = ''; toast('Event Added');
+}
+
+function deleteEvent(id) { if(confirm('Delete event?')) db.ref('events/' + id).remove(); }
+
+// --- MATCHES ---
+function submitMatch() {
+    const wn = document.getElementById('wSel').value, ln = document.getElementById('lSel').value;
+    if(!wn || !ln || wn === ln) return;
+    const w = players.find(p => p.name === wn), l = players.find(p => p.name === ln);
+    const diff = Math.round(32 * (1 - (1 / (1 + Math.pow(10, (l.rating - w.rating) / 400)))));
+    db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
+    db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
+    db.ref('logs').push({ w: wn, l: ln, diff, ts: Date.now() });
+    toast('Score Updated');
+}
+
+function undoMatch(id) {
+    const m = logs.find(x => x.id === id);
+    if(!m || !confirm('Undo this match?')) return;
+    const w = players.find(p => p.name === m.w), l = players.find(p => p.name === m.l);
+    if(w && l) {
+        db.ref('players/' + m.w.replace(/\./g, '_')).update({ rating: w.rating - m.diff });
+        db.ref('players/' + m.l.replace(/\./g, '_')).update({ rating: l.rating + m.diff });
+    }
+    db.ref('logs/' + id).remove(); toast('Match Undone');
+}
+
+// --- RENDERS ---
 function renderRanking() {
     const sorted = players.filter(p => currentGroup === 'All' || p.group === currentGroup).sort((a,b) => b.rating - a.rating);
     document.getElementById('rankList').innerHTML = sorted.map((p, i) => `
-        <div class="rank-card ${i<3?'r1':''}">
+        <div class="rank-card">
             <div class="r-num">${i+1}</div>
-            <div class="r-avatar">${p.name[0]}</div>
-            <div class="r-info"><div class="r-name">${p.name}</div><div style="font-size:10px;color:var(--muted2)">${p.group}</div></div>
+            <div class="r-info"><div class="r-name">${p.name}</div><div style="font-size:10px; color:var(--muted2)">${p.group}</div></div>
             <div class="r-pts">${Math.round(p.rating)}</div>
-        </div>
-    `).join('');
-    
-    const groups = ['All', 'Open', 'U18', 'U15', 'U12'];
-    document.getElementById('groupTabs').innerHTML = groups.map(g => `
-        <div class="g-tab ${currentGroup===g?'active':''}" onclick="currentGroup='${g}';renderRanking();">${g}</div>
-    `).join('');
+        </div>`).join('');
+    const gs = ['All', 'Open', 'U18', 'U15', 'U12'];
+    document.getElementById('groupTabs').innerHTML = gs.map(g => `<div class="g-tab ${currentGroup===g?'active':''}" onclick="currentGroup='${g}';renderRanking();">${g}</div>`).join('');
 }
 
-function renderRecentMatches() {
-    const recent = logs.slice().reverse().slice(0, 10);
-    document.getElementById('recentMatches').innerHTML = recent.map(m => `
-        <div class="match-row">
-            <span style="font-size:13px;"><b>${m.w}</b> def. ${m.l} (+${m.diff})</span>
-            <span class="undo-btn" onclick="undoMatch('${m.id}')">✕</span>
-        </div>
-    `).join('');
+function renderEvents() {
+    document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
+        <div class="event-card">
+            <div><div style="font-family:'Share Tech Mono'; font-size:11px; color:var(--blue)">${e.date}</div><div style="font-weight:900; text-transform:uppercase">${e.name}</div></div>
+            <div class="danger-text" onclick="deleteEvent('${e.id}')">✕</div>
+        </div>`).join('') || '<div style="text-align:center; color:var(--muted)">No events scheduled</div>';
 }
 
-function renderCoachPanel() {
-    document.getElementById('athleteManage').innerHTML = `
-        <table class="pts-table">
-            ${players.map(p => `
-                <tr>
-                    <td><b>${p.name}</b><br><small>${p.group}</small></td>
-                    <td align="right"><button class="danger-btn" onclick="deletePlayer('${p.name}')">Delete</button></td>
-                </tr>
-            `).join('')}
-        </table>`;
+function renderMatches() {
+    document.getElementById('recentMatches').innerHTML = logs.slice().reverse().slice(0,10).map(m => `
+        <div class="match-row"><span><b>${m.w}</b> def. ${m.l} (+${m.diff})</span><span class="danger-text" onclick="undoMatch('${m.id}')">✕</span></div>`).join('');
+}
+
+function renderAdmin() {
+    document.getElementById('adminList').innerHTML = players.map(p => `<div class="match-row"><span>${p.name} (${p.group})</span><span class="danger-text" onclick="if(confirm('Delete player?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">Delete</span></div>`).join('');
 }
 
 function updateSelects() {
-    const opts = players.map(p => `<option value="${p.name}">${p.name} (${p.group})</option>`).join('');
-    document.getElementById('wSel').innerHTML = '<option value="">Winner...</option>' + opts;
-    document.getElementById('lSel').innerHTML = '<option value="">Opponent...</option>' + opts;
+    const h = '<option value="">Select...</option>' + players.map(p => `<option value="${p.name}">${p.name} (${p.group})</option>`).join('');
+    document.getElementById('wSel').innerHTML = h; document.getElementById('lSel').innerHTML = h;
 }
 
 initData();
