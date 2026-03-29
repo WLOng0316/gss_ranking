@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        :root { --blue: #00d4ff; --red: #ff3b3b; --bg: #030508; --card: #0b0d12; --line: #1c2230; --text: #e8edf5; --muted: #3a4558; }
+        :root { --blue: #00d4ff; --red: #ff3b3b; --bg: #030508; --card: #0b0d12; --line: #1c2230; --text: #e8edf5; --muted: #3a4558; --gold: #f39c12; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; }
         
@@ -38,7 +38,7 @@
         .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line); color: #fff; padding: 14px; border-radius: 8px; margin-bottom: 10px; font-size: 15px; }
 
         /* PIN LOCK */
-        #adminAuthLayer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #adminAuthLayer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3,5,8,0.98); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .pass-dots { display: flex; gap: 15px; margin-bottom: 40px; }
         .dot { width: 12px; height: 12px; border: 2px solid var(--muted); border-radius: 50%; }
         .dot.filled { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 10px var(--blue); }
@@ -46,28 +46,29 @@
         .key { width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #fff; background: rgba(255,255,255,0.03); }
         .key:active { background: var(--blue); color: #000; }
 
-        /* LISTS */
+        /* RANKING CARD & WTT DETAILS */
         .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 15px; margin: 0 20px 8px; display: flex; align-items: center; cursor: pointer; }
+        .rank-card:active { background: var(--line); }
         .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: var(--blue); margin-left: auto; }
+        
+        /* WTT 风格详情弹窗 */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 400; display: none; overflow-y: auto; padding-bottom: 80px; }
+        .overlay-header { padding: 60px 20px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--line); }
+        .avatar-circle { width: 60px; height: 60px; background: var(--line); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; color: var(--muted); border: 2px solid var(--blue); }
         .match-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 15px; margin: 0 20px 10px; position: relative; }
-        .del-x { position: absolute; right: 15px; top: 15px; color: var(--red); font-weight: bold; cursor: pointer; }
+        .win-tag { color: var(--blue); font-weight: 900; font-size: 10px; border: 1px solid var(--blue); padding: 1px 4px; border-radius: 3px; margin-right: 5px; }
 
-        /* Event Detail Overlay */
-        #eventDetail { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 400; display: none; overflow-y: auto; padding-bottom: 80px; }
-        .back-btn { padding: 20px; color: var(--blue); font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-top: 40px; }
-        .entry-group { background: #141820; margin: 10px 20px; padding: 15px; border-radius: 8px; border-left: 3px solid var(--blue); }
-        .entry-group-title { color: var(--blue); font-weight: 900; margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 5px; font-size: 14px; }
-
+        .score-row { display: grid; grid-template-columns: 50px 1fr 1fr; gap: 10px; align-items: center; margin-bottom: 8px; }
         .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 12px 25px; border-radius: 30px; font-weight: 900; opacity: 0; z-index: 1000; pointer-events: none; transition: 0.3s; }
         .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
 
-<header><div class="logo">GSS RANKING</div><div style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">SYSTEM V10.1</div></header>
+<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">SYSTEM V11.0</div></header>
 
-<div id="adminAuthLayer" style="display:none;">
-    <div style="margin-bottom:20px; color:var(--muted); font-weight:700; letter-spacing:2px;">COACH PIN</div>
+<div id="adminAuthLayer">
+    <div style="margin-bottom:20px; color:var(--muted); font-weight:700; letter-spacing:2px;">COACH ACCESS PIN</div>
     <div class="pass-dots" id="passDots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
     <div class="keypad">
         <div class="key" onclick="pressKey('1')">1</div><div class="key" onclick="pressKey('2')">2</div><div class="key" onclick="pressKey('3')">3</div>
@@ -79,54 +80,57 @@
     </div>
 </div>
 
-<div id="eventDetail">
-    <div class="back-btn" onclick="closeEventDetail()">← BACK TO LIST</div>
+<div id="playerDetail" class="overlay">
+    <div style="padding: 20px; color: var(--blue); font-weight: 900;" onclick="closeDetail()">← BACK</div>
+    <div id="playerDetailContent"></div>
+</div>
+
+<div id="eventDetail" class="overlay">
+    <div style="padding: 20px; color: var(--blue); font-weight: 900;" onclick="closeEvent()">← BACK TO LIST</div>
     <div id="eventDetailContent"></div>
 </div>
 
 <div id="pg-ranking" class="page active">
-    <div class="sec-title">Current Standings</div>
+    <div class="sec-title">Global Standings</div>
     <div id="rankList"></div>
 </div>
 
 <div id="pg-events" class="page">
-    <div class="sec-title">Tournaments (Click to View)</div>
+    <div class="sec-title">Active Tournaments</div>
     <div id="eventList"></div>
-</div>
-
-<div id="pg-match" class="page">
-    <div class="sec-title">Record Result</div>
-    <div class="form-wrap">
-        <select id="wSel" class="wtt-select"></select>
-        <select id="lSel" class="wtt-select"></select>
-        <div id="scoreInputs">
-            <script>
-                for(let i=1; i<=5; i++){
-                    document.write(`<div style="display:grid; grid-template-columns: 50px 1fr 1fr; gap:10px; align-items:center; margin-bottom:8px;"><div style="font-size:10px; color:var(--muted)">SET ${i}</div><input type="number" id="s${i}w" class="wtt-input" placeholder="W" style="margin-bottom:0"><input type="number" id="s${i}l" class="wtt-input" placeholder="L" style="margin-bottom:0"></div>`);
-                }
-            </script>
-        </div>
-        <button onclick="submitMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:18px; border-radius:8px; font-weight:900; margin-top:10px;">UPLOAD SCORE</button>
-    </div>
-    <div class="sec-title">History</div>
-    <div id="recentMatches"></div>
 </div>
 
 <div id="pg-coach" class="page">
     <div id="adminMain" style="display:none;">
-        <div class="sec-title">Add Athlete</div>
+        <div class="sec-title">Admin: Record Match Score</div>
         <div class="form-wrap">
-            <input type="text" id="newName" class="wtt-input" placeholder="Name">
+            <select id="wSel" class="wtt-select"></select>
+            <select id="lSel" class="wtt-select"></select>
+            <div id="scoreInputs">
+                <script>
+                    for(let i=1; i<=5; i++){
+                        document.write(`<div class="score-row"><div style="font-size:10px; color:var(--muted)">SET ${i}</div><input type="number" id="s${i}w" class="wtt-input" placeholder="W" style="margin-bottom:0"><input type="number" id="s${i}l" class="wtt-input" placeholder="L" style="margin-bottom:0"></div>`);
+                    }
+                </script>
+            </div>
+            <button onclick="submitMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:18px; border-radius:8px; font-weight:900; margin-top:10px;">SUBMIT SCORE</button>
+        </div>
+
+        <div class="sec-title">Admin: Register Athlete</div>
+        <div class="form-wrap">
+            <input type="text" id="newName" class="wtt-input" placeholder="Full Name">
             <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
             <button onclick="addPlayer()" style="width:100%; background:var(--blue); padding:15px; border:none; border-radius:8px; font-weight:900;">ADD PLAYER</button>
         </div>
-        <div class="sec-title">Post New Event</div>
+
+        <div class="sec-title">Admin: New Event</div>
         <div class="form-wrap">
             <input type="text" id="evName" class="wtt-input" placeholder="Event Name">
             <input type="text" id="evDate" class="wtt-input" placeholder="Date">
             <button onclick="addEvent()" style="width:100%; background:var(--text); color:#000; padding:15px; border:none; border-radius:8px; font-weight:900;">POST EVENT</button>
         </div>
-        <div class="sec-title">Management</div>
+
+        <div class="sec-title">Athlete Database</div>
         <div id="adminList"></div>
     </div>
 </div>
@@ -134,14 +138,13 @@
 <nav>
     <div class="nav-tab active" onclick="tab('ranking', this)">Ranking</div>
     <div class="nav-tab" onclick="tab('events', this)">Events</div>
-    <div class="nav-tab" onclick="tab('match', this)">Match</div>
     <div class="nav-tab" onclick="tab('coach', this)">Admin</div>
 </nav>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// --- FIREBASE (保持你的原有配置) ---
+// --- FIREBASE CONFIG ---
 const firebaseConfig = {
     apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
     authDomain: "gss-ranking.firebaseapp.com",
@@ -164,7 +167,6 @@ function initData() {
     });
     db.ref('logs').on('value', snap => {
         logs = snap.val() ? Object.entries(snap.val()).map(([id, data]) => ({id, ...data})) : [];
-        renderMatches();
     });
     db.ref('events').on('value', snap => {
         events = snap.val() ? Object.entries(snap.val()).map(([id, data]) => ({id, ...data})) : [];
@@ -175,11 +177,11 @@ function initData() {
 
 // --- NAV & PIN ---
 function tab(id, el) {
-    closeEventDetail();
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
     document.getElementById('pg-' + id).classList.add('active');
     el.classList.add('active');
+    
     if(id === 'coach' && !isAdmin) {
         document.getElementById('adminAuthLayer').style.display = 'flex';
         pinInput = ""; updatePinDots();
@@ -195,19 +197,60 @@ function pressKey(n) {
                     isAdmin = true;
                     document.getElementById('adminAuthLayer').style.display = 'none';
                     document.getElementById('adminMain').style.display = 'block';
-                    renderEvents(); // 重新渲染以显示删除按钮
+                    document.getElementById('statusLabel').textContent = "ADMIN MODE";
+                    document.getElementById('statusLabel').style.color = "var(--blue)";
                 } else { toast("WRONG PIN"); pinInput = ""; updatePinDots(); }
             }, 200);
         }
     }
 }
 function updatePinDots() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('filled', i < pinInput.length)); }
-function clearPin() { document.getElementById('adminAuthLayer').style.display = 'none'; tab('ranking', document.querySelector('.nav-tab')); }
+function clearPin() { 
+    document.getElementById('adminAuthLayer').style.display = 'none'; 
+    tab('ranking', document.querySelector('.nav-tab')); 
+}
 function delPin() { pinInput = pinInput.slice(0,-1); updatePinDots(); }
 
+// --- PLAYER DETAILS (WTT STYLE) ---
+function openDetail(name) {
+    const p = players.find(x => x.name === name);
+    const pLogs = logs.filter(l => l.w === name || l.l === name).reverse().slice(0, 10);
+    
+    let html = `
+        <div class="overlay-header">
+            <div class="avatar-circle">${name.charAt(0)}</div>
+            <div>
+                <div style="font-size:24px; font-weight:900;">${p.name}</div>
+                <div style="font-size:12px; color:var(--muted)">GROUP: ${p.group} | RATING: ${Math.round(p.rating)}</div>
+            </div>
+        </div>
+        <div class="sec-title">Recent Match History</div>
+    `;
+    
+    html += pLogs.map(m => {
+        const isWin = m.w === name;
+        return `
+            <div class="match-card">
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div>
+                        <span class="win-tag" style="${isWin ? '' : 'color:var(--muted); border-color:var(--muted)'}">${isWin ? 'WIN' : 'LOSS'}</span>
+                        <b>vs ${isWin ? m.l : m.w}</b>
+                    </div>
+                    <div style="color:${isWin ? 'var(--blue)' : 'var(--red)'}; font-weight:900">${isWin ? '+' : ''}${isWin ? m.diff : -m.diff}</div>
+                </div>
+                <div style="font-size:11px; color:var(--muted); margin-top:8px; font-family:'Share Tech Mono'">${m.score}</div>
+            </div>
+        `;
+    }).join('') || '<div style="text-align:center; padding:30px; color:var(--muted)">No matches found</div>';
+    
+    document.getElementById('playerDetailContent').innerHTML = html;
+    document.getElementById('playerDetail').style.display = 'block';
+}
+function closeDetail() { document.getElementById('playerDetail').style.display = 'none'; }
+
 // --- EVENT LOGIC ---
-function openEventDetail(id) { currentEventId = id; document.getElementById('eventDetail').style.display = 'block'; renderEventDetail(); }
-function closeEventDetail() { currentEventId = null; document.getElementById('eventDetail').style.display = 'none'; }
+function openEvent(id) { currentEventId = id; document.getElementById('eventDetail').style.display = 'block'; renderEventDetail(); }
+function closeEvent() { currentEventId = null; document.getElementById('eventDetail').style.display = 'none'; }
 
 function renderEventDetail() {
     const ev = events.find(x => x.id === currentEventId);
@@ -230,10 +273,10 @@ function renderEventDetail() {
     groups.forEach(g => {
         const list = participants.filter(([key, val]) => val.group === g);
         html += `
-            <div class="entry-group">
-                <div class="entry-group-title">${g} (${list.length})</div>
+            <div class="entry-group" style="background:#141820; margin:10px 20px; padding:15px; border-radius:8px; border-left:3px solid var(--blue);">
+                <div style="color:var(--blue); font-weight:900; margin-bottom:10px; border-bottom:1px solid var(--line); padding-bottom:5px; font-size:14px;">${g} (${list.length})</div>
                 ${list.map(([key, val]) => `<div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
-                <span>${val.name}</span>${isAdmin ? `<span style="color:var(--red)" onclick="unregister('${key}')">Remove</span>` : ''}</div>`).join('') || '<div style="color:var(--muted); font-size:12px">No entries</div>'}
+                <span>${val.name}</span>${isAdmin ? `<span style="color:var(--red)" onclick="unregister('${key}')">Remove</span>` : ''}</div>`).join('') || '<div style="color:var(--muted); font-size:12px">Empty</div>'}
             </div>`;
     });
     document.getElementById('eventDetailContent').innerHTML = html;
@@ -248,10 +291,10 @@ function registerForEvent() {
 
 function unregister(key) { if(confirm('Delete?')) db.ref(`events/${currentEventId}/participants/${key}`).remove(); }
 
-// --- CORE FUNCTIONS ---
+// --- ADMIN MATCH LOGIC ---
 function submitMatch() {
     const wn = document.getElementById('wSel').value, ln = document.getElementById('lSel').value;
-    if(!wn || !ln || wn === ln) return;
+    if(!wn || !ln || wn === ln) return toast("Invalid Players", true);
     let scores = [];
     for(let i=1; i<=5; i++){
         let w = document.getElementById(`s${i}w`).value, l = document.getElementById(`s${i}l`).value;
@@ -262,9 +305,13 @@ function submitMatch() {
     db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
     db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
     db.ref('logs').push({ w: wn, l: ln, diff, score: scores.join(', '), ts: Date.now() });
-    toast("SAVED");
+    
+    // Reset inputs
+    for(let i=1; i<=5; i++) { document.getElementById(`s${i}w`).value = ''; document.getElementById(`s${i}l`).value = ''; }
+    toast("SCORE SAVED");
 }
 
+// --- PLAYER & EVENT ADMIN ---
 function addEvent() {
     const n = document.getElementById('evName').value, d = document.getElementById('evDate').value;
     if(!n || !d) return;
@@ -276,32 +323,38 @@ function addPlayer() {
     const n = document.getElementById('newName').value.trim();
     if(!n) return;
     db.ref('players/' + n.replace(/\./g, '_')).set({ name: n, group: document.getElementById('newGroup').value, rating: 1000 });
-    toast("PLAYER ADDED");
+    toast("ATHLETE ADDED");
+    document.getElementById('newName').value = "";
 }
 
 function renderRanking() {
     const sorted = [...players].sort((a,b) => b.rating - a.rating);
-    document.getElementById('rankList').innerHTML = sorted.map((p, i) => `<div class="rank-card"><div style="width:25px; color:var(--muted); font-weight:900;">${i+1}</div><div><div style="font-weight:700;">${p.name}</div><div style="font-size:10px; color:var(--muted)">${p.group}</div></div><div class="r-pts">${Math.round(p.rating)}</div></div>`).join('');
+    document.getElementById('rankList').innerHTML = sorted.map((p, i) => `
+        <div class="rank-card" onclick="openDetail('${p.name}')">
+            <div style="width:25px; color:var(--muted); font-weight:900;">${i+1}</div>
+            <div><div style="font-weight:700;">${p.name}</div><div style="font-size:10px; color:var(--muted)">${p.group}</div></div>
+            <div class="r-pts">${Math.round(p.rating)}</div>
+        </div>`).join('');
 }
 
 function renderEvents() {
     document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
-        <div class="rank-card" onclick="openEventDetail('${e.id}')">
+        <div class="rank-card" onclick="openEvent('${e.id}')">
             <div><div style="font-family:'Share Tech Mono'; color:var(--blue)">${e.date}</div><div style="font-weight:900; font-size:18px">${e.name}</div>
-            <div style="font-size:10px; color:var(--muted)">PARTICIPANTS: ${e.participants ? Object.keys(e.participants).length : 0}</div></div>
+            <div style="font-size:10px; color:var(--muted)">PLAYERS: ${e.participants ? Object.keys(e.participants).length : 0}</div></div>
             <div style="margin-left:auto; display:flex; align-items:center; gap:15px;">
-                ${isAdmin ? `<span style="color:var(--red); font-weight:bold;" onclick="event.stopPropagation(); if(confirm('Delete event?')) db.ref('events/${e.id}').remove();">DELETE</span>` : ''}
+                ${isAdmin ? `<span style="color:var(--red); font-weight:bold;" onclick="event.stopPropagation(); if(confirm('Delete event?')) db.ref('events/${e.id}').remove();">DEL</span>` : ''}
                 <span style="color:var(--muted)">→</span>
             </div>
         </div>`).join('') || '<div style="text-align:center; padding:50px; color:var(--muted)">NO EVENTS</div>';
 }
 
-function renderMatches() {
-    document.getElementById('recentMatches').innerHTML = logs.slice().reverse().slice(0,5).map(m => `<div class="match-card"><b>${m.w}</b> def. ${m.l} <div style="font-size:11px; color:var(--muted)">${m.score} | +${m.diff} PTS</div></div>`).join('');
-}
-
 function renderAdmin() {
-    document.getElementById('adminList').innerHTML = players.map(p => `<div class="match-card" style="display:flex; justify-content:space-between"><span>${p.name}</span><span style="color:var(--red)" onclick="if(confirm('Delete?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">DEL</span></div>`).join('');
+    document.getElementById('adminList').innerHTML = players.map(p => `
+        <div class="match-card" style="display:flex; justify-content:space-between">
+            <span>${p.name}</span>
+            <span style="color:var(--red)" onclick="if(confirm('Delete?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">DEL</span>
+        </div>`).join('');
 }
 
 function updateSelects() {
