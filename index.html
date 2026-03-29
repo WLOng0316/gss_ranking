@@ -2,142 +2,125 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GSS | WTT RANKING SYSTEM V8.5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GSS RANKING</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22GSS%20Ranking%22,%22short_name%22:%22GSS%22,%22start_url%22:%22.%22,%22background_color%22:%22%23030508%22,%22theme_color%22:%22%23030508%22}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="GSS Ranking">
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22GSS%20Ranking%22,%22short_name%22:%22GSS%22,%22start_url%22:%22index.html%22,%22display%22:%22standalone%22,%22background_color%22:%22%23030508%22,%22theme_color%22:%22%23030508%22}">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        :root { --blue: #00d4ff; --gold: #ffd700; --red: #ff3b3b; --bg: #030508; --card: #0b0d12; --line2: #1c2230; --text: #e8edf5; --muted: #3a4558; --muted2: #5a6a80; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
+        :root { --blue: #00d4ff; --red: #ff3b3b; --bg: #030508; --card: #0b0d12; --line: #1c2230; --text: #e8edf5; --muted: #3a4558; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; -webkit-user-select: none; }
         
-        header { padding: 50px 20px 14px; background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--line2); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 200; backdrop-filter: blur(20px); }
-        .logo-gss { font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 900; font-style: italic; color: #fff; }
-        
-        .page { display: none; animation: fadeUp 0.2s ease; }
-        .page.active { display: block; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        nav { position: fixed; bottom: 0; width: 100%; background: rgba(3,5,8,0.97); display: flex; border-top: 1px solid var(--line2); padding: 12px 0 25px; z-index: 200; }
-        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
+        /* Header & Nav */
+        header { padding: 60px 20px 15px; background: rgba(0,0,0,0.9); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); }
+        .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; font-style: italic; letter-spacing: -1px; }
+        nav { position: fixed; bottom: 0; width: 100%; background: rgba(3,5,8,0.95); display: flex; border-top: 1px solid var(--line); padding: 15px 0 30px; z-index: 100; backdrop-filter: blur(15px); }
+        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
         .nav-tab.active { color: var(--blue); }
+
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 通用样式 */
+        .sec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; padding: 20px; display: flex; align-items: center; gap: 10px; }
+        .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+        .form-wrap { padding: 0 20px; }
+        .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line); color: #fff; padding: 14px; border-radius: 8px; margin-bottom: 10px; font-size: 15px; }
+
+        /* 九宫格密码锁样式 */
+        #adminAuthLayer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .pass-dots { display: flex; gap: 15px; margin-bottom: 40px; }
+        .dot { width: 12px; height: 12px; border: 2px solid var(--muted); border-radius: 50%; transition: 0.2s; }
+        .dot.filled { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 10px var(--blue); }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .key { width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #fff; background: rgba(255,255,255,0.03); cursor: pointer; }
+        .key:active { background: var(--blue); color: #000; }
+
+        /* 比分录入网格 */
+        .score-row { display: grid; grid-template-columns: 40px 1fr 1fr; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .set-label { font-size: 11px; color: var(--muted); font-weight: 700; }
+
+        /* 列表卡片 */
+        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 15px; margin: 0 20px 8px; display: flex; align-items: center; }
+        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: var(--blue); margin-left: auto; }
+        .match-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 15px; margin: 0 20px 10px; position: relative; }
+        .del-x { position: absolute; right: 15px; top: 15px; color: var(--red); font-weight: bold; font-size: 18px; }
         
-        .sec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; padding: 20px; display: flex; align-items: center; gap: 10px; }
-        .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--line2); }
-        
-        .group-tabs { display: flex; gap: 8px; padding: 0 20px 15px; overflow-x: auto; }
-        .g-tab { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; padding: 6px 12px; border-radius: 3px; border: 1px solid var(--line2); background: var(--card); color: var(--muted2); }
-        .g-tab.active { background: var(--blue); color: #000; font-weight: 900; border-color: var(--blue); }
-        
-        .rank-card { background: var(--card); border: 1px solid #141820; border-radius: 6px; display: flex; align-items: center; padding: 12px; margin-bottom: 6px; }
-        .r-info { flex: 1; }
-        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: #fff; }
-        
-        .form-wrap { padding: 0 16px 16px; }
-        .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line2); color: #fff; padding: 12px; border-radius: 4px; margin-bottom: 10px; font-size: 14px; }
-        
-        /* 5局比分样式 */
-        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .score-label { grid-column: span 2; font-size: 10px; color: var(--muted2); text-transform: uppercase; margin-top: 5px; }
-        
-        .btn-primary { width: 100%; background: var(--blue); color: #000; border: none; padding: 15px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; border-radius: 4px; }
-        .match-row { background: var(--card); padding: 12px; border-radius: 6px; margin-bottom: 8px; border: 1px solid var(--line2); }
-        .danger-text { color: var(--red); font-weight: bold; cursor: pointer; }
-        
-        /* Admin 登录层 */
-        #adminAuthLayer { padding: 40px 20px; text-align: center; }
-        .lock-icon { font-size: 40px; margin-bottom: 20px; color: var(--muted2); }
-        
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: 900; opacity: 0; transition: 0.3s; z-index: 999; pointer-events: none; }
+        .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 12px 25px; border-radius: 30px; font-weight: 900; opacity: 0; z-index: 1000; pointer-events: none; transition: 0.3s; }
         .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
 
-<header><div class="logo-gss">GSS</div><div style="font-family:'Share Tech Mono'; font-size:9px; color:var(--muted)">V8.5 PRO</div></header>
+<header><div class="logo">GSS RANKING</div><div style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">SYSTEM V9.0</div></header>
 
-<div id="pg-ranking" class="page active">
-    <div class="sec-title">Rankings</div>
-    <div class="group-tabs" id="groupTabs"></div>
-    <div class="rank-list" id="rankList"></div>
+<div id="adminAuthLayer" style="display:none;">
+    <div style="margin-bottom: 20px; color: var(--muted); font-weight: 700; letter-spacing: 2px;">ENTER COACH PIN</div>
+    <div class="pass-dots" id="passDots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="keypad">
+        <div class="key" onclick="pressKey('1')">1</div><div class="key" onclick="pressKey('2')">2</div><div class="key" onclick="pressKey('3')">3</div>
+        <div class="key" onclick="pressKey('4')">4</div><div class="key" onclick="pressKey('5')">5</div><div class="key" onclick="pressKey('6')">6</div>
+        <div class="key" onclick="pressKey('7')">7</div><div class="key" onclick="pressKey('8')">8</div><div class="key" onclick="pressKey('9')">9</div>
+        <div class="key" style="border:none; background:none; font-size:14px; color:var(--red)" onclick="clearPin()">ESC</div>
+        <div class="key" onclick="pressKey('0')">0</div>
+        <div class="key" style="border:none; background:none; font-size:14px; color:var(--blue)" onclick="delPin()">DEL</div>
+    </div>
 </div>
 
-<div id="pg-events" class="page">
-    <div class="sec-title">Events Schedule</div>
-    <div id="eventList"></div>
+<div id="pg-ranking" class="page active">
+    <div class="sec-title">Current Standings</div>
+    <div id="rankList"></div>
 </div>
 
 <div id="pg-match" class="page">
-    <div class="sec-title">Submit Result (Best of 5)</div>
+    <div class="sec-title">Upload Result (BO5)</div>
     <div class="form-wrap">
         <select id="wSel" class="wtt-select"></select>
         <select id="lSel" class="wtt-select"></select>
-        
-        <div class="score-grid">
-            <div class="score-label">Set 1</div>
-            <input type="number" id="s1w" class="wtt-input" placeholder="Winner">
-            <input type="number" id="s1l" class="wtt-input" placeholder="Loser">
-            
-            <div class="score-label">Set 2</div>
-            <input type="number" id="s2w" class="wtt-input" placeholder="Winner">
-            <input type="number" id="s2l" class="wtt-input" placeholder="Loser">
-            
-            <div class="score-label">Set 3</div>
-            <input type="number" id="s3w" class="wtt-input" placeholder="Winner">
-            <input type="number" id="s3l" class="wtt-input" placeholder="Loser">
-            
-            <div class="score-label">Set 4 (Optional)</div>
-            <input type="number" id="s4w" class="wtt-input" placeholder="Winner">
-            <input type="number" id="s4l" class="wtt-input" placeholder="Loser">
-            
-            <div class="score-label">Set 5 (Optional)</div>
-            <input type="number" id="s5w" class="wtt-input" placeholder="Winner">
-            <input type="number" id="s5l" class="wtt-input" placeholder="Loser">
+        <div id="scoreInputs">
+            <script>
+                for(let i=1; i<=5; i++){
+                    document.write(`
+                        <div class="score-row">
+                            <div class="set-label">SET ${i}</div>
+                            <input type="number" id="s${i}w" class="wtt-input" placeholder="Winner" style="margin-bottom:0">
+                            <input type="number" id="s${i}l" class="wtt-input" placeholder="Loser" style="margin-bottom:0">
+                        </div>
+                    `);
+                }
+            </script>
         </div>
-        
-        <button class="btn-primary" onclick="submitMatch()">Upload Result</button>
+        <button class="btn-primary" onclick="submitMatch()" style="width:100%; background:var(--blue); border:none; padding:18px; border-radius:8px; font-weight:900; margin-top:10px;">SUBMIT SCORE</button>
     </div>
     <div class="sec-title">Recent History</div>
-    <div id="recentMatches" style="padding: 0 16px;"></div>
+    <div id="recentMatches"></div>
 </div>
 
 <div id="pg-coach" class="page">
-    <div id="adminAuthLayer">
-        <div class="lock-icon">🔒</div>
-        <div class="sec-title" style="justify-content:center;">Coach Only</div>
-        <input type="password" id="adminPass" class="wtt-input" style="text-align:center;" placeholder="Enter Password">
-        <button class="btn-primary" onclick="unlockAdmin()">Unlock Dashboard</button>
+    <div class="sec-title">Athlete Registration</div>
+    <div class="form-wrap">
+        <input type="text" id="newName" class="wtt-input" placeholder="Name">
+        <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
+        <button class="btn-primary" onclick="addPlayer()" style="width:100%; background:var(--blue); border:none; padding:15px; border-radius:8px; font-weight:900;">ADD PLAYER</button>
     </div>
-
-    <div id="adminMain" style="display:none;">
-        <div class="sec-title">Register Athlete</div>
-        <div class="form-wrap">
-            <input type="text" id="newName" class="wtt-input" placeholder="Player Name">
-            <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
-            <button class="btn-primary" onclick="addPlayer()">Add Player</button>
-        </div>
-        <div class="sec-title">New Event</div>
-        <div class="form-wrap">
-            <input type="text" id="evName" class="wtt-input" placeholder="Event Name">
-            <input type="text" id="evDate" class="wtt-input" placeholder="Date">
-            <button class="btn-primary" onclick="addEvent()">Post Event</button>
-        </div>
-        <div class="sec-title">Manage Players</div>
-        <div id="adminList" class="form-wrap"></div>
-    </div>
+    <div class="sec-title">Tournament Management</div>
+    <div id="adminList"></div>
 </div>
 
 <nav>
     <div class="nav-tab active" onclick="tab('ranking', this)">Ranking</div>
-    <div class="nav-tab" onclick="tab('events', this)">Events</div>
     <div class="nav-tab" onclick="tab('match', this)">Match</div>
     <div class="nav-tab" onclick="tab('coach', this)">Admin</div>
 </nav>
@@ -145,7 +128,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// --- FIREBASE CONFIG ---
+// --- FIREBASE CONFIG (保持不变) ---
 const firebaseConfig = {
     apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
     authDomain: "gss-ranking.firebaseapp.com",
@@ -158,8 +141,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const PASS = "8888"; // 默认密码
-let players = [], logs = [], events = [], currentGroup = 'All';
+const MASTER_PIN = "8888"; 
+let players = [], logs = [], pinInput = "";
 
 function initData() {
     db.ref('players').on('value', snap => {
@@ -170,131 +153,119 @@ function initData() {
         logs = snap.val() ? Object.entries(snap.val()).map(([id, data]) => ({id, ...data})) : [];
         renderMatches();
     });
-    db.ref('events').on('value', snap => {
-        events = snap.val() ? Object.entries(snap.val()).map(([id, data]) => ({id, ...data})) : [];
-        renderEvents();
-    });
 }
 
-// --- NAVIGATION & AUTH ---
+// --- 九宫格逻辑 ---
+function pressKey(num) {
+    if(pinInput.length < 4) {
+        pinInput += num;
+        updatePinDots();
+        if(pinInput.length === 4) {
+            setTimeout(() => {
+                if(pinInput === MASTER_PIN) {
+                    document.getElementById('adminAuthLayer').style.display = 'none';
+                    toast("COACH ACCESS GRANTED");
+                } else {
+                    toast("INVALID PIN");
+                    clearPin();
+                }
+            }, 200);
+        }
+    }
+}
+function updatePinDots() {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, i) => dot.classList.toggle('filled', i < pinInput.length));
+}
+function clearPin() { pinInput = ""; updatePinDots(); if(currentTab !== 'coach') document.getElementById('adminAuthLayer').style.display = 'none'; }
+function delPin() { pinInput = pinInput.slice(0, -1); updatePinDots(); }
+
+// --- 导航 ---
+let currentTab = 'ranking';
 function tab(id, el) {
+    currentTab = id;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
     document.getElementById('pg-' + id).classList.add('active');
     el.classList.add('active');
     
-    // 如果切换回 Admin 且未解锁，显示登录层
     if(id === 'coach') {
-        document.getElementById('adminAuthLayer').style.display = 'block';
-        document.getElementById('adminMain').style.display = 'none';
-        document.getElementById('adminPass').value = '';
+        document.getElementById('adminAuthLayer').style.display = 'flex';
+        clearPin();
     }
 }
 
-function unlockAdmin() {
-    if(document.getElementById('adminPass').value === PASS) {
-        document.getElementById('adminAuthLayer').style.display = 'none';
-        document.getElementById('adminMain').style.display = 'block';
-    } else {
-        alert('Wrong Password');
-    }
-}
-
-// --- MATCH SUBMISSION (5 SETS) ---
+// --- 核心逻辑 ---
 function submitMatch() {
     const wn = document.getElementById('wSel').value, ln = document.getElementById('lSel').value;
-    if(!wn || !ln || wn === ln) return alert('Select players');
+    if(!wn || !ln || wn === ln) return alert("Select players");
 
-    let scoreArr = [];
+    let scores = [];
     for(let i=1; i<=5; i++) {
-        let wVal = document.getElementById(`s${i}w`).value;
-        let lVal = document.getElementById(`s${i}l`).value;
-        if(wVal !== "" && lVal !== "") scoreArr.push(`${wVal}-${lVal}`);
+        let w = document.getElementById(`s${i}w`).value, l = document.getElementById(`s${i}l`).value;
+        if(w !== "" && l !== "") scores.push(`${w}-${l}`);
     }
-    const finalScore = scoreArr.join(', ');
-
     const w = players.find(p => p.name === wn), l = players.find(p => p.name === ln);
     const diff = Math.round(32 * (1 - (1 / (1 + Math.pow(10, (l.rating - w.rating) / 400)))));
     
     db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
     db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
-    db.ref('logs').push({ w: wn, l: ln, diff, score: finalScore, ts: Date.now() });
+    db.ref('logs').push({ w: wn, l: ln, diff, score: scores.join(', '), ts: Date.now() });
     
-    // Clear
+    // Reset
     for(let i=1; i<=5; i++) { document.getElementById(`s${i}w`).value = ''; document.getElementById(`s${i}l`).value = ''; }
-    toast('Match Saved');
-}
-
-// --- OTHER ACTIONS ---
-function addPlayer() {
-    const n = document.getElementById('newName').value.trim();
-    if(!n) return;
-    db.ref('players/' + n.replace(/\./g, '_')).set({ name: n, group: document.getElementById('newGroup').value, rating: 1000 });
-    document.getElementById('newName').value = ''; toast('Player Added');
-}
-
-function addEvent() {
-    const n = document.getElementById('evName').value.trim(), d = document.getElementById('evDate').value.trim();
-    if(!n || !d) return;
-    db.ref('events').push({ name: n, date: d });
-    document.getElementById('evName').value = ''; document.getElementById('evDate').value = ''; toast('Event Added');
+    toast("MATCH RECORDED");
 }
 
 function undoMatch(id) {
-    if(prompt('Coach Password:') !== PASS) return alert('Wrong password');
+    let p = prompt("ENTER COACH PIN TO UNDO:");
+    if(p !== MASTER_PIN) return;
     const m = logs.find(x => x.id === id);
     const w = players.find(p => p.name === m.w), l = players.find(p => p.name === m.l);
     if(w && l) {
         db.ref('players/' + m.w.replace(/\./g, '_')).update({ rating: w.rating - m.diff });
         db.ref('players/' + m.l.replace(/\./g, '_')).update({ rating: l.rating + m.diff });
     }
-    db.ref('logs/' + id).remove(); toast('Match Undone');
+    db.ref('logs/' + id).remove();
 }
 
-// --- RENDERS ---
+function addPlayer() {
+    const n = document.getElementById('newName').value.trim();
+    if(!n) return;
+    db.ref('players/' + n.replace(/\./g, '_')).set({ name: n, group: document.getElementById('newGroup').value, rating: 1000 });
+    document.getElementById('newName').value = ""; toast("PLAYER REGISTERED");
+}
+
+// --- 渲染渲染 ---
 function renderRanking() {
-    const sorted = players.filter(p => currentGroup === 'All' || p.group === currentGroup).sort((a,b) => b.rating - a.rating);
+    const sorted = [...players].sort((a,b) => b.rating - a.rating);
     document.getElementById('rankList').innerHTML = sorted.map((p, i) => `
         <div class="rank-card">
-            <div style="width:30px; font-weight:900; color:var(--muted)">${i+1}</div>
-            <div class="r-info"><div style="font-weight:700;text-transform:uppercase;">${p.name}</div><div style="font-size:10px;color:var(--muted2)">${p.group}</div></div>
+            <div style="width:25px; color:var(--muted); font-weight:900;">${i+1}</div>
+            <div><div style="font-weight:700;">${p.name}</div><div style="font-size:10px; color:var(--muted)">${p.group}</div></div>
             <div class="r-pts">${Math.round(p.rating)}</div>
-        </div>`).join('');
-    const gs = ['All', 'Open', 'U18', 'U15', 'U12'];
-    document.getElementById('groupTabs').innerHTML = gs.map(g => `<div class="g-tab ${currentGroup===g?'active':''}" onclick="currentGroup='${g}';renderRanking();">${g}</div>`).join('');
-}
-
-function renderEvents() {
-    document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
-        <div class="rank-card" style="justify-content:space-between">
-            <div><div style="font-family:'Share Tech Mono';font-size:11px;color:var(--blue)">${e.date}</div><div style="font-weight:900;">${e.name}</div></div>
         </div>`).join('');
 }
 
 function renderMatches() {
-    document.getElementById('recentMatches').innerHTML = logs.slice().reverse().slice(0,10).map(m => `
-        <div class="match-row">
-            <div style="display:flex; justify-content:space-between;">
-                <span><b>${m.w}</b> vs ${m.l}</span>
-                <span class="danger-text" onclick="undoMatch('${m.id}')">✕</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--muted2); margin-top:5px;">
-                <span>Sets: ${m.score}</span>
-                <span>+${m.diff} pts</span>
-            </div>
+    document.getElementById('recentMatches').innerHTML = logs.slice().reverse().slice(0,8).map(m => `
+        <div class="match-card">
+            <div style="font-weight:700;">${m.w} <span style="color:var(--blue)">def.</span> ${m.l}</div>
+            <div style="font-size:11px; color:var(--muted); margin-top:5px;">${m.score} | +${m.diff} PTS</div>
+            <div class="del-x" onclick="undoMatch('${m.id}')">✕</div>
         </div>`).join('');
 }
 
 function renderAdmin() {
     document.getElementById('adminList').innerHTML = players.map(p => `
-        <div class="match-row" style="display:flex; justify-content:space-between;">
+        <div class="match-card" style="display:flex; justify-content:space-between; align-items:center;">
             <span>${p.name}</span>
-            <span class="danger-text" onclick="if(confirm('Delete?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">DELETE</span>
+            <span style="color:var(--red); font-size:12px; font-weight:700;" onclick="if(confirm('Delete?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">DELETE</span>
         </div>`).join('');
 }
 
 function updateSelects() {
-    const h = '<option value="">Select Athlete...</option>' + players.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+    const h = '<option value="">SELECT ATHLETE</option>' + players.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
     document.getElementById('wSel').innerHTML = h; document.getElementById('lSel').innerHTML = h;
 }
 
