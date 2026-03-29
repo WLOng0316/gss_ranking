@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GSS | WTT RANKING SYSTEM V7.3</title>
+    <title>GSS | RANKING SYSTEM V8.0</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        :root { --blue: #00d4ff; --gold: #ffd700; --silver: #b8c4ce; --bronze: #cd7f32; --red: #ff3b3b; --green: #00e676; --bg: #030508; --card: #0b0d12; --line2: #1c2230; --text: #e8edf5; --muted: #3a4558; --muted2: #5a6a80; }
+        :root { --blue: #00d4ff; --gold: #ffd700; --red: #ff3b3b; --bg: #030508; --card: #0b0d12; --line2: #1c2230; --text: #e8edf5; --muted: #3a4558; --muted2: #5a6a80; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; }
         header { padding: 50px 20px 14px; background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--line2); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 200; backdrop-filter: blur(20px); }
@@ -32,24 +32,24 @@
         .g-tab { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; padding: 6px 12px; border-radius: 3px; border: 1px solid var(--line2); background: var(--card); color: var(--muted2); }
         .g-tab.active { background: var(--blue); color: #000; font-weight: 900; border-color: var(--blue); }
         .rank-list { padding: 0 16px; }
-        .rank-card { background: var(--card); border: 1px solid #141820; border-radius: 6px; display: flex; align-items: center; padding: 12px; margin-bottom: 6px; position: relative; }
+        .rank-card { background: var(--card); border: 1px solid #141820; border-radius: 6px; display: flex; align-items: center; padding: 12px; margin-bottom: 6px; }
         .r-num { width: 30px; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; color: var(--muted); }
         .r-info { flex: 1; }
-        .r-name { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; text-transform: uppercase; }
         .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: #fff; }
-        .event-card { background: var(--card); border: 1px solid var(--line2); border-left: 3px solid var(--blue); border-radius: 6px; padding: 15px; margin: 0 16px 10px; display: flex; justify-content: space-between; align-items: center; }
         .form-wrap { padding: 0 16px 16px; }
-        .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line2); color: #fff; padding: 12px; border-radius: 4px; margin-bottom: 10px; }
+        .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line2); color: #fff; padding: 12px; border-radius: 4px; margin-bottom: 10px; font-size: 14px; }
+        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .btn-primary { width: 100%; background: var(--blue); color: #000; border: none; padding: 15px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 900; border-radius: 4px; }
-        .match-row { display: flex; justify-content: space-between; padding: 10px; background: var(--card); border-radius: 4px; margin-bottom: 5px; border: 1px solid var(--line2); font-size: 13px; }
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: 900; opacity: 0; transition: 0.3s; z-index: 999; }
-        .toast.show { opacity: 1; }
+        .match-row { background: var(--card); padding: 12px; border-radius: 6px; margin-bottom: 8px; border: 1px solid var(--line2); }
+        .match-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted2); margin-top: 5px; }
         .danger-text { color: var(--red); font-weight: bold; cursor: pointer; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: 900; opacity: 0; transition: 0.3s; z-index: 999; pointer-events: none; }
+        .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
 
-<header><div class="logo-gss">GSS</div><div style="font-family:'Share Tech Mono'; font-size:9px; color:var(--muted)">V7.3 CLOUD</div></header>
+<header><div class="logo-gss">GSS</div><div style="font-family:'Share Tech Mono'; font-size:9px; color:var(--muted)">V8.0 SECURE</div></header>
 
 <div id="pg-ranking" class="page active">
     <div class="sec-title">Rankings</div>
@@ -58,36 +58,54 @@
 </div>
 
 <div id="pg-events" class="page">
-    <div class="sec-title">Tournament Schedule</div>
+    <div class="sec-title">Events</div>
     <div id="eventList"></div>
 </div>
 
 <div id="pg-match" class="page">
-    <div class="sec-title">New Match</div>
+    <div class="sec-title">Record Match</div>
     <div class="form-wrap">
         <select id="wSel" class="wtt-select"></select>
         <select id="lSel" class="wtt-select"></select>
+        <div class="sec-title" style="padding: 10px 0;">Game Scores (Winner - Loser)</div>
+        <div class="score-grid">
+            <input type="number" id="s1" class="wtt-input" placeholder="Set 1 (e.g. 11)">
+            <input type="number" id="s1_l" class="wtt-input" placeholder="Set 1 Opp.">
+            <input type="number" id="s2" class="wtt-input" placeholder="Set 2">
+            <input type="number" id="s2_l" class="wtt-input" placeholder="Set 2 Opp.">
+            <input type="number" id="s3" class="wtt-input" placeholder="Set 3">
+            <input type="number" id="s3_l" class="wtt-input" placeholder="Set 3 Opp.">
+        </div>
         <button class="btn-primary" onclick="submitMatch()">Submit Result</button>
     </div>
-    <div class="sec-title">Recent History (Tap X to Undo)</div>
+    <div class="sec-title">History</div>
     <div id="recentMatches" style="padding: 0 16px;"></div>
 </div>
 
 <div id="pg-coach" class="page">
-    <div class="sec-title">Admin: Register Player</div>
-    <div class="form-wrap">
-        <input type="text" id="newName" class="wtt-input" placeholder="Player Name">
-        <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
-        <button class="btn-primary" onclick="addPlayer()">Add Player</button>
+    <div id="adminAuth">
+        <div class="sec-title">Authentication Required</div>
+        <div class="form-wrap">
+            <input type="password" id="adminPass" class="wtt-input" placeholder="Enter Coach Password">
+            <button class="btn-primary" onclick="checkPass()">Login to Admin</button>
+        </div>
     </div>
-    <div class="sec-title">Admin: Add Event</div>
-    <div class="form-wrap">
-        <input type="text" id="evName" class="wtt-input" placeholder="Event Name">
-        <input type="text" id="evDate" class="wtt-input" placeholder="Date (e.g. 15 Oct)">
-        <button class="btn-primary" onclick="addEvent()">Post Event</button>
+    <div id="adminContent" style="display:none;">
+        <div class="sec-title">Register Player</div>
+        <div class="form-wrap">
+            <input type="text" id="newName" class="wtt-input" placeholder="Full Name">
+            <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
+            <button class="btn-primary" onclick="addPlayer()">Add Player</button>
+        </div>
+        <div class="sec-title">Schedule Event</div>
+        <div class="form-wrap">
+            <input type="text" id="evName" class="wtt-input" placeholder="Event Name">
+            <input type="text" id="evDate" class="wtt-input" placeholder="Date">
+            <button class="btn-primary" onclick="addEvent()">Post Event</button>
+        </div>
+        <div class="sec-title">Manage Database</div>
+        <div id="adminList" class="form-wrap"></div>
     </div>
-    <div class="sec-title">Management</div>
-    <div id="adminList" class="form-wrap"></div>
 </div>
 
 <nav>
@@ -100,6 +118,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// --- CONFIG (Do not change unless you change Firebase projects) ---
 const firebaseConfig = {
     apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
     authDomain: "gss-ranking.firebaseapp.com",
@@ -112,6 +131,22 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// --- SECURITY ---
+const MASTER_PASS = "8888"; // 你可以在这里修改管理员密码
+let isAdmin = false;
+
+function checkPass() {
+    const p = document.getElementById('adminPass').value;
+    if(p === MASTER_PASS) {
+        isAdmin = true;
+        document.getElementById('adminAuth').style.display = 'none';
+        document.getElementById('adminContent').style.display = 'block';
+    } else {
+        alert('Wrong Password');
+    }
+}
+
+// --- DATA ---
 let players = [], logs = [], events = [], currentGroup = 'All';
 
 function initData() {
@@ -134,50 +169,66 @@ function tab(id, el) {
     document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
     document.getElementById('pg-' + id).classList.add('active');
     el.classList.add('active');
+    // 如果离开 Admin 页，重置登录状态
+    if(id !== 'coach') {
+        isAdmin = false;
+        document.getElementById('adminAuth').style.display = 'block';
+        document.getElementById('adminContent').style.display = 'none';
+        document.getElementById('adminPass').value = '';
+    }
 }
 
 function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
 
-// --- PLAYERS ---
+// --- ACTIONS ---
 function addPlayer() {
     const n = document.getElementById('newName').value.trim();
     if(!n) return;
     db.ref('players/' + n.replace(/\./g, '_')).set({ name: n, group: document.getElementById('newGroup').value, rating: 1000 });
-    document.getElementById('newName').value = ''; toast('Player Added');
+    document.getElementById('newName').value = ''; toast('Player Registered');
 }
 
-// --- EVENTS ---
 function addEvent() {
     const name = document.getElementById('evName').value.trim();
     const date = document.getElementById('evDate').value.trim();
     if(!name || !date) return;
     db.ref('events').push({ name, date });
-    document.getElementById('evName').value = ''; document.getElementById('evDate').value = ''; toast('Event Added');
+    document.getElementById('evName').value = ''; document.getElementById('evDate').value = ''; toast('Event Posted');
 }
 
-function deleteEvent(id) { if(confirm('Delete event?')) db.ref('events/' + id).remove(); }
-
-// --- MATCHES ---
 function submitMatch() {
     const wn = document.getElementById('wSel').value, ln = document.getElementById('lSel').value;
-    if(!wn || !ln || wn === ln) return;
+    if(!wn || !ln || wn === ln) { alert('Select 2 different players'); return; }
+
+    // Collect Scores
+    const s1w = document.getElementById('s1').value || 0; const s1l = document.getElementById('s1_l').value || 0;
+    const s2w = document.getElementById('s2').value || 0; const s2l = document.getElementById('s2_l').value || 0;
+    const s3w = document.getElementById('s3').value || 0; const s3l = document.getElementById('s3_l').value || 0;
+    const fullScore = `${s1w}-${s1l}, ${s2w}-${s2l}, ${s3w}-${s3l}`;
+
     const w = players.find(p => p.name === wn), l = players.find(p => p.name === ln);
     const diff = Math.round(32 * (1 - (1 / (1 + Math.pow(10, (l.rating - w.rating) / 400)))));
+    
     db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
     db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
-    db.ref('logs').push({ w: wn, l: ln, diff, ts: Date.now() });
-    toast('Score Updated');
+    db.ref('logs').push({ w: wn, l: ln, diff, score: fullScore, ts: Date.now() });
+    
+    // Clear inputs
+    ['s1','s1_l','s2','s2_l','s3','s3_l'].forEach(id => document.getElementById(id).value = '');
+    toast('Score Uploaded');
 }
 
 function undoMatch(id) {
+    const p = prompt('Enter Admin Password to Undo:');
+    if(p !== MASTER_PASS) return alert('Unauthorized');
+    
     const m = logs.find(x => x.id === id);
-    if(!m || !confirm('Undo this match?')) return;
     const w = players.find(p => p.name === m.w), l = players.find(p => p.name === m.l);
     if(w && l) {
         db.ref('players/' + m.w.replace(/\./g, '_')).update({ rating: w.rating - m.diff });
         db.ref('players/' + m.l.replace(/\./g, '_')).update({ rating: l.rating + m.diff });
     }
-    db.ref('logs/' + id).remove(); toast('Match Undone');
+    db.ref('logs/' + id).remove(); toast('Reverted');
 }
 
 // --- RENDERS ---
@@ -186,7 +237,7 @@ function renderRanking() {
     document.getElementById('rankList').innerHTML = sorted.map((p, i) => `
         <div class="rank-card">
             <div class="r-num">${i+1}</div>
-            <div class="r-info"><div class="r-name">${p.name}</div><div style="font-size:10px; color:var(--muted2)">${p.group}</div></div>
+            <div class="r-info"><div style="font-weight:700;text-transform:uppercase;">${p.name}</div><div style="font-size:10px;color:var(--muted2)">${p.group}</div></div>
             <div class="r-pts">${Math.round(p.rating)}</div>
         </div>`).join('');
     const gs = ['All', 'Open', 'U18', 'U15', 'U12'];
@@ -195,23 +246,36 @@ function renderRanking() {
 
 function renderEvents() {
     document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
-        <div class="event-card">
-            <div><div style="font-family:'Share Tech Mono'; font-size:11px; color:var(--blue)">${e.date}</div><div style="font-weight:900; text-transform:uppercase">${e.name}</div></div>
-            <div class="danger-text" onclick="deleteEvent('${e.id}')">✕</div>
-        </div>`).join('') || '<div style="text-align:center; color:var(--muted)">No events scheduled</div>';
+        <div class="rank-card" style="justify-content:space-between">
+            <div><div style="font-family:'Share Tech Mono';font-size:11px;color:var(--blue)">${e.date}</div><div style="font-weight:900;">${e.name}</div></div>
+            ${isAdmin ? `<div class="danger-text" onclick="db.ref('events/${e.id}').remove()">✕</div>` : ''}
+        </div>`).join('');
 }
 
 function renderMatches() {
     document.getElementById('recentMatches').innerHTML = logs.slice().reverse().slice(0,10).map(m => `
-        <div class="match-row"><span><b>${m.w}</b> def. ${m.l} (+${m.diff})</span><span class="danger-text" onclick="undoMatch('${m.id}')">✕</span></div>`).join('');
+        <div class="match-row">
+            <div style="display:flex; justify-content:space-between;">
+                <span><b>${m.w}</b> def. ${m.l}</span>
+                <span class="danger-text" onclick="undoMatch('${m.id}')">✕</span>
+            </div>
+            <div class="match-meta">
+                <span>Score: ${m.score}</span>
+                <span>+${m.diff} pts</span>
+            </div>
+        </div>`).join('');
 }
 
 function renderAdmin() {
-    document.getElementById('adminList').innerHTML = players.map(p => `<div class="match-row"><span>${p.name} (${p.group})</span><span class="danger-text" onclick="if(confirm('Delete player?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">Delete</span></div>`).join('');
+    document.getElementById('adminList').innerHTML = players.map(p => `
+        <div class="match-row">
+            <span>${p.name} (${p.group})</span>
+            <span class="danger-text" onclick="if(confirm('Delete?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">DELETE</span>
+        </div>`).join('');
 }
 
 function updateSelects() {
-    const h = '<option value="">Select...</option>' + players.map(p => `<option value="${p.name}">${p.name} (${p.group})</option>`).join('');
+    const h = '<option value="">Choose Player...</option>' + players.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
     document.getElementById('wSel').innerHTML = h; document.getElementById('lSel').innerHTML = h;
 }
 
