@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GSS | WTT RANKING SYSTEM V7 CLOUD</title>
-
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="GSS Ranking">
     <meta name="mobile-web-app-capable" content="yes">
-
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22GSS%20Ranking%22,%22short_name%22:%22GSS%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23030508%22,%22theme_color%22:%22%23030508%22}">
 
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/192/00d4ff/ffffff?text=GSS">
-    
-	
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
@@ -23,350 +19,52 @@
 
     <style>
         :root {
-          --blue: #00d4ff;
-          --blue-dim: #00aacc;
-          --gold: #ffd700;
-          --silver: #b8c4ce;
-          --bronze: #cd7f32;
-          --red: #ff3b3b;
-          --green: #00e676;
-          --bg: #030508;
-          --card: #0b0d12;
-          --card2: #0f1219;
-          --line: #141820;
-          --line2: #1c2230;
-          --text: #e8edf5;
-          --muted: #3a4558;
-          --muted2: #5a6a80;
+          --blue: #00d4ff; --blue-dim: #00aacc; --gold: #ffd700; --silver: #b8c4ce; --bronze: #cd7f32;
+          --red: #ff3b3b; --green: #00e676; --bg: #030508; --card: #0b0d12; --card2: #0f1219;
+          --line: #141820; --line2: #1c2230; --text: #e8edf5; --muted: #3a4558; --muted2: #5a6a80;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-          margin: 0;
-          font-family: 'Barlow', sans-serif;
-          background: var(--bg);
-          color: var(--text);
-          padding-bottom: 80px;
-          min-height: 100vh;
-          overflow-x: hidden;
-        }
-
-        body::before {
-          content: '';
-          position: fixed;
-          inset: 0;
-          background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.012) 2px, rgba(0,212,255,0.012) 4px);
-          pointer-events: none;
-          z-index: 9999;
-        }
-
-        header {
-          padding: 50px 20px 14px;
-          background: linear-gradient(180deg, #000 0%, rgba(0,0,0,0.95) 100%);
-          border-bottom: 1px solid var(--line2);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          position: sticky;
-          top: 0;
-          z-index: 200;
-          backdrop-filter: blur(20px);
-        }
-
-        .logo-block { display: flex; align-items: baseline; gap: 10px; }
-        .logo-gss {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 38px;
-          font-weight: 900;
-          font-style: italic;
-          letter-spacing: -1px;
-          color: #fff;
-          line-height: 1;
-        }
-        .logo-wtt {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 11px;
-          font-weight: 700;
-          color: var(--blue);
-          letter-spacing: 3px;
-          text-transform: uppercase;
-        }
-        .ver-tag {
-          font-family: 'Share Tech Mono', monospace;
-          font-size: 9px;
-          color: var(--muted);
-          letter-spacing: 1px;
-          border: 1px solid var(--line2);
-          padding: 3px 7px;
-          border-radius: 2px;
-        }
-
+        body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; min-height: 100vh; overflow-x: hidden; }
+        header { padding: 50px 20px 14px; background: rgba(0,0,0,0.95); border-bottom: 1px solid var(--line2); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 200; backdrop-filter: blur(20px); }
+        .logo-gss { font-family: 'Barlow Condensed', sans-serif; font-size: 38px; font-weight: 900; font-style: italic; color: #fff; line-height: 1; }
+        .ver-tag { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--muted); border: 1px solid var(--line2); padding: 3px 7px; border-radius: 2px; }
         .page { display: none; animation: fadeUp 0.25s ease; }
         .page.active { display: block; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-        nav {
-          position: fixed;
-          bottom: 0;
-          width: 100%;
-          background: rgba(3,5,8,0.97);
-          display: flex;
-          border-top: 1px solid var(--line2);
-          padding: 12px 0 28px;
-          z-index: 200;
-          backdrop-filter: blur(20px);
-        }
-        .nav-tab {
-          flex: 1;
-          text-align: center;
-          color: var(--muted);
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          cursor: pointer;
-          padding: 4px 0;
-          transition: color 0.2s;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-        }
+        nav { position: fixed; bottom: 0; width: 100%; background: rgba(3,5,8,0.97); display: flex; border-top: 1px solid var(--line2); padding: 12px 0 28px; z-index: 200; backdrop-filter: blur(20px); }
+        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-tab.active { color: var(--blue); }
-        .nav-icon { font-size: 18px; line-height: 1; }
-
-        .sec-title {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 4px;
-          color: var(--muted);
-          text-transform: uppercase;
-          padding: 20px 20px 10px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
+        .sec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 4px; color: var(--muted); text-transform: uppercase; padding: 20px 20px 10px; display: flex; align-items: center; gap: 10px; }
         .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--line2); }
-
-        .group-tabs {
-          display: flex;
-          gap: 6px;
-          padding: 0 20px 15px;
-          overflow-x: auto;
-          scrollbar-width: none;
-        }
-        .g-tab {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 2px;
-          padding: 7px 14px;
-          border-radius: 2px;
-          cursor: pointer;
-          white-space: nowrap;
-          border: 1px solid var(--line2);
-          color: var(--muted2);
-          background: var(--card);
-          transition: all 0.2s;
-          flex-shrink: 0;
-        }
-        .g-tab.active {
-          background: var(--blue);
-          color: #000;
-          border-color: var(--blue);
-          font-weight: 900;
-        }
-
+        .group-tabs { display: flex; gap: 6px; padding: 0 20px 15px; overflow-x: auto; scrollbar-width: none; }
+        .g-tab { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; padding: 7px 14px; border-radius: 2px; cursor: pointer; border: 1px solid var(--line2); color: var(--muted2); background: var(--card); }
+        .g-tab.active { background: var(--blue); color: #000; border-color: var(--blue); font-weight: 900; }
         .rank-list { padding: 0 16px; display: flex; flex-direction: column; gap: 6px; }
-
-        .rank-card {
-          background: var(--card);
-          border: 1px solid var(--line);
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          padding: 12px 14px;
-          cursor: pointer;
-          transition: all 0.15s;
-          position: relative;
-        }
-        .rank-card::before {
-          content: '';
-          position: absolute;
-          left: 0; top: 0; bottom: 0;
-          width: 3px;
-          background: var(--muted);
-        }
+        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 6px; display: flex; align-items: center; padding: 12px 14px; cursor: pointer; position: relative; }
+        .rank-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--muted); }
         .rank-card.r1::before { background: var(--gold); }
-        .rank-card.r2::before { background: var(--silver); }
-        .rank-card.r3::before { background: var(--bronze); }
-        .rank-card.r1 { background: linear-gradient(90deg, rgba(255,215,0,0.06) 0%, var(--card) 40%); }
-
-        .r-num {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 22px;
-          font-weight: 900;
-          font-style: italic;
-          width: 36px;
-          color: var(--muted);
-        }
-        .rank-card.r1 .r-num { color: var(--gold); }
-        .rank-card.r2 .r-num { color: var(--silver); }
-        .rank-card.r3 .r-num { color: var(--bronze); }
-
-        .r-avatar {
-          width: 44px; height: 44px;
-          border-radius: 50%;
-          background: var(--line2);
-          border: 2px solid var(--line2);
-          margin-right: 12px;
-          overflow: hidden;
-          display: flex; align-items: center; justify-content: center;
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 10px; font-weight: 900;
-          color: var(--muted);
-          flex-shrink: 0;
-        }
-        .r-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-        .r-info { flex: 1; min-width: 0; }
-        .r-name {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 17px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        .r-meta {
-          font-size: 10px;
-          color: var(--muted2);
-          margin-top: 2px;
-          font-family: 'Share Tech Mono', monospace;
-        }
-
-        .r-right { text-align: right; flex-shrink: 0; }
-        .r-pts {
-          font-family: 'Barlow Condensed', sans-serif;
-          font-size: 26px;
-          font-weight: 900;
-          color: #fff;
-          line-height: 1;
-        }
-        .r-pts-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-
-        .events-wrap { padding: 0 16px; }
-        .event-card {
-          background: var(--card);
-          border: 1px solid var(--line2);
-          border-radius: 6px;
-          padding: 18px;
-          margin-bottom: 10px;
-          position: relative;
-        }
-        .event-card::before {
-          content: '';
-          position: absolute;
-          left: 0; top: 0; bottom: 0;
-          width: 3px;
-          border-radius: 6px 0 0 6px;
-        }
-        .event-card.tier-p::before { background: var(--blue); }
-        .event-card.tier-g::before { background: var(--gold); }
-        .event-card.tier-s::before { background: var(--silver); }
-        .event-card.tier-b::before { background: var(--bronze); }
-
-        .ev-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .event-tier-badge {
-          font-family: 'Share Tech Mono', monospace;
-          font-size: 9px;
-          padding: 2px 8px;
-          border-radius: 2px;
-          font-weight: bold;
-          letter-spacing: 1px;
-        }
-        .tier-platinum { background: rgba(0,212,255,0.15); color: var(--blue); border: 1px solid var(--blue); }
-        .tier-gold { background: rgba(255,215,0,0.12); color: var(--gold); border: 1px solid var(--gold); }
-        .tier-silver { background: rgba(184,196,206,0.12); color: var(--silver); border: 1px solid var(--silver); }
-        .tier-bronze { background: rgba(205,127,50,0.12); color: var(--bronze); border: 1px solid var(--bronze); }
-
-        .ev-date { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted2); }
-        .ev-name { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; text-transform: uppercase; margin: 4px 0; }
-        .ev-loc { font-size: 11px; color: var(--muted2); }
-        .ev-pts-badge { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--blue); margin-top: 8px; font-weight: bold; }
-
-        .del-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; color: var(--muted); cursor: pointer; padding: 4px 8px; border: 1px solid var(--line2); border-radius: 2px; }
-
+        .r-num { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; width: 36px; color: var(--muted); }
+        .r-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--line2); margin-right: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; color: var(--muted); }
+        .r-info { flex: 1; }
+        .r-name { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; text-transform: uppercase; }
+        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: #fff; line-height: 1; }
         .form-wrap { padding: 16px; }
-        .field-group { margin-bottom: 14px; }
-        .field-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--muted2); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line2); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 15px; padding: 12px 14px; border-radius: 4px; outline: none; }
-        .wtt-input:focus { border-color: var(--blue); }
-        .btn-primary { width: 100%; background: var(--blue); color: #000; border: none; padding: 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 4px; margin-top: 6px; }
-        .btn-ghost { width: 100%; background: transparent; color: var(--muted2); border: 1px solid var(--line2); padding: 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 4px; margin-top: 8px; }
-        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        .match-box { margin: 0 16px 20px; background: var(--card); border: 1px solid var(--line2); border-top: 2px solid var(--blue); border-radius: 6px; padding: 18px; }
-        .match-box-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 4px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
-
-        .coach-locked { padding: 30px 20px; text-align: center; }
-        .lock-icon { font-size: 48px; margin-bottom: 16px; }
-        .pin-dots { display: flex; gap: 12px; justify-content: center; margin: 20px 0; }
-        .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); background: transparent; }
-        .pin-dot.filled { background: var(--blue); border-color: var(--blue); }
-        .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 260px; margin: 0 auto; }
-        .pin-key { background: var(--card); border: 1px solid var(--line2); border-radius: 6px; padding: 18px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; text-align: center; cursor: pointer; }
-        .pin-error { color: var(--red); font-size: 12px; margin-top: 10px; font-family: 'Share Tech Mono', monospace; }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 500; align-items: flex-end; justify-content: center; backdrop-filter: blur(12px); }
-        .modal-sheet { background: var(--card2); width: 100%; max-width: 480px; border-radius: 20px 20px 0 0; border: 1px solid var(--line2); max-height: 90vh; overflow-y: auto; padding-bottom: 40px; }
-        .sheet-hero { background: linear-gradient(135deg, #0a1520 0%, #050a10 100%); padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--line2); position: relative; }
-        .sh-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--blue); margin: 0 auto 14px; overflow: hidden; background: var(--line2); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 900; }
-        .sh-name { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; text-transform: uppercase; }
-        .close-sheet { position: absolute; top: 14px; right: 16px; width: 30px; height: 30px; background: var(--line2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border-top: 1px solid var(--line2); border-bottom: 1px solid var(--line2); }
-        .stat-cell { background: var(--card2); padding: 16px 8px; text-align: center; }
-        .stat-v { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; color: #fff; }
-        .stat-v.blue { color: var(--blue); }
-        .stat-v.green { color: var(--green); }
-        .stat-l { font-size: 9px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
-
-        .form-history { padding: 20px; }
-        .form-match { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--card); border-radius: 4px; border: 1px solid var(--line); margin-bottom: 8px; }
-        .fm-badge { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; }
-        .fm-badge.w { background: rgba(0,230,118,0.15); color: var(--green); }
-        .fm-badge.l { background: rgba(255,59,59,0.15); color: var(--red); }
-        .fm-opp { flex: 1; font-size: 13px; font-weight: 600; text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; }
-        .fm-diff { font-family: 'Share Tech Mono', monospace; font-size: 12px; font-weight: bold; }
-        .fm-diff.pos { color: var(--green); }
-        .fm-diff.neg { color: var(--red); }
-
-        .tier-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 20px; }
-        .tier-info-card { background: var(--card); border: 1px solid var(--line2); border-radius: 6px; padding: 14px; text-align: center; }
-
-        .pts-table { width: 100%; border-collapse: collapse; }
-        .pts-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; color: var(--muted); padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line2); }
-        .pts-table td { padding: 10px; border-bottom: 1px solid var(--line); font-size: 12px; }
-
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--blue); color: #000; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 900; padding: 12px 24px; border-radius: 100px; z-index: 9999; opacity: 0; transition: all 0.3s; pointer-events: none; }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .toast.error { background: var(--red); color: #fff; }
-
-        .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: 2px; }
-        .danger-btn { width: 100%; background: rgba(255,59,59,0.1); color: var(--red); border: 1px solid rgba(255,59,59,0.3); padding: 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; border-radius: 4px; margin-top: 8px; cursor: pointer; }
+        .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line2); color: var(--text); padding: 12px; border-radius: 4px; margin-bottom: 10px; }
+        .btn-primary { width: 100%; background: var(--blue); color: #000; border: none; padding: 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; }
+        .danger-btn { background: rgba(255,59,59,0.1); color: var(--red); border: 1px solid rgba(255,59,59,0.3); padding: 6px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; }
+        .match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--card); margin-bottom: 5px; border-radius: 4px; }
+        .undo-btn { color: var(--red); font-size: 18px; cursor: pointer; padding: 0 10px; }
+        .pts-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .pts-table td { padding: 12px 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 12px 24px; border-radius: 100px; font-weight: 900; opacity: 0; transition: 0.3s; z-index: 1000; }
+        .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
 
 <header>
-  <div class="logo-block">
-    <div class="logo-gss">GSS</div>
-    <div class="logo-wtt">RANKING SYSTEM</div>
-  </div>
-  <div class="ver-tag">V7.0 CLOUD</div>
+  <div class="logo-gss">GSS</div>
+  <div class="ver-tag">V7.2 CLOUD ADMIN</div>
 </header>
 
 <div id="pg-ranking" class="page active">
@@ -375,112 +73,38 @@
   <div class="rank-list" id="rankList"></div>
 </div>
 
-<div id="pg-events" class="page">
-  <div class="sec-title">Upcoming Events</div>
-  <div class="tier-info-grid">
-    <div class="tier-info-card"><div style="color:var(--blue)">PLATINUM</div><div style="font-size:20px;font-weight:bold;">100</div></div>
-    <div class="tier-info-card"><div style="color:var(--gold)">GOLD</div><div style="font-size:20px;font-weight:bold;">60</div></div>
-    <div class="tier-info-card"><div style="color:var(--silver)">SILVER</div><div style="font-size:20px;font-weight:bold;">30</div></div>
-    <div class="tier-info-card"><div style="color:var(--bronze)">BRONZE</div><div style="font-size:20px;font-weight:bold;">10</div></div>
-  </div>
-  <div class="events-wrap" id="eventList"></div>
-</div>
-
 <div id="pg-match" class="page">
   <div class="sec-title">Record Match</div>
-  <div class="match-box">
-    <div class="field-group">
-      <label class="field-label">Winner</label>
-      <input type="text" id="sW" class="wtt-input" placeholder="Search winner..." oninput="doSearch('w')">
-      <select id="wSel" class="wtt-select" style="margin-top:6px;"></select>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Opponent</label>
-      <input type="text" id="sL" class="wtt-input" placeholder="Search opponent..." oninput="doSearch('l')">
-      <select id="lSel" class="wtt-select" style="margin-top:6px;"></select>
-    </div>
-    <div class="two-col">
-      <div class="field-group"><label class="field-label">Score</label><input type="text" id="scoreInp" class="wtt-input" placeholder="3-0"></div>
-      <div class="field-group"><label class="field-label">Event</label><select id="evSel" class="wtt-select"></select></div>
-    </div>
-    <button class="btn-primary" onclick="submitMatch()">▶ Submit Result</button>
+  <div class="form-wrap">
+    <select id="wSel" class="wtt-select"></select>
+    <select id="lSel" class="wtt-select"></select>
+    <button class="btn-primary" onclick="submitMatch()">Submit Result</button>
   </div>
-  <div class="sec-title">Recent Results</div>
-  <div style="padding:0 16px;" id="recentMatches"></div>
+  <div class="sec-title">Recent History (Tap ✕ to Undo)</div>
+  <div id="recentMatches" style="padding: 0 16px;"></div>
 </div>
 
 <div id="pg-coach" class="page">
-  <div id="coachLock" class="coach-locked">
-    <div class="lock-icon">🔒</div>
-    <div class="pin-dots" id="pinDots">
-      <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div><div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
-    </div>
-    <div class="pin-pad">
-        <div class="pin-key" onclick="pinInput('1')">1</div><div class="pin-key" onclick="pinInput('2')">2</div><div class="pin-key" onclick="pinInput('3')">3</div>
-        <div class="pin-key" onclick="pinInput('4')">4</div><div class="pin-key" onclick="pinInput('5')">5</div><div class="pin-key" onclick="pinInput('6')">6</div>
-        <div class="pin-key" onclick="pinInput('7')">7</div><div class="pin-key" onclick="pinInput('8')">8</div><div class="pin-key" onclick="pinInput('9')">9</div>
-        <div class="pin-key" style="color:var(--muted)" onclick="pinClear()">CLR</div><div class="pin-key" onclick="pinInput('0')">0</div><div class="pin-key" style="color:var(--muted)" onclick="pinDel()">⌫</div>
-    </div>
-    <div class="pin-error" id="pinError"></div>
+  <div class="sec-title">Admin Panel</div>
+  <div class="form-wrap">
+    <input type="text" id="newName" class="wtt-input" placeholder="New Athlete Name">
+    <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
+    <button class="btn-primary" onclick="addPlayer()">Register Athlete</button>
   </div>
-
-  <div id="coachPanel" style="display:none;">
-    <div class="sec-title">Register Athlete</div>
-    <div class="form-wrap">
-      <input type="text" id="newName" class="wtt-input" placeholder="Full Name" style="margin-bottom:10px;">
-      <div class="two-col">
-        <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
-        <select id="newGender" class="wtt-select"><option value="M">Male</option><option value="F">Female</option></select>
-      </div>
-      <button class="btn-primary" onclick="addPlayer()">Register</button>
-    </div>
-    <div class="sec-title">Post Event</div>
-    <div class="form-wrap">
-        <input type="text" id="evName" class="wtt-input" placeholder="Event Name" style="margin-bottom:10px;">
-        <div class="two-col">
-            <input type="text" id="evDate" class="wtt-input" placeholder="Date">
-            <select id="evTier" class="wtt-select"><option value="platinum">Platinum</option><option value="gold">Gold</option><option value="silver">Silver</option><option value="bronze">Bronze</option></select>
-        </div>
-        <button class="btn-primary" onclick="postEvent()">Publish</button>
-    </div>
-    <div class="sec-title">Athlete Management</div>
-    <div id="athleteManage" class="form-wrap"></div>
-    <div class="form-wrap">
-        <button class="danger-btn" onclick="resetAllRatings()">Reset All Ratings</button>
-        <button class="btn-ghost" onclick="lockCoach()">Lock Panel</button>
-    </div>
-  </div>
+  <div class="sec-title">Manage Players</div>
+  <div id="athleteManage" class="form-wrap"></div>
 </div>
 
 <nav>
-  <div class="nav-tab active" onclick="tab('ranking', this)"><div class="nav-icon">🏆</div>Ranking</div>
-  <div class="nav-tab" onclick="tab('events', this)"><div class="nav-icon">📅</div>Events</div>
-  <div class="nav-tab" onclick="tab('match', this)"><div class="nav-icon">⚡</div>Match</div>
-  <div class="nav-tab" onclick="tab('coach', this)"><div class="nav-icon">🔐</div>Coach</div>
+  <div class="nav-tab active" onclick="tab('ranking', this)">🏆 Ranking</div>
+  <div class="nav-tab" onclick="tab('match', this)">⚡ Match</div>
+  <div class="nav-tab" onclick="tab('coach', this)">🔐 Coach</div>
 </nav>
-
-<div id="profileModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal-sheet">
-    <div class="sheet-hero">
-      <div class="close-sheet" onclick="closeModal()">✕</div>
-      <div class="sh-avatar" id="shAvatar"></div>
-      <div class="sh-name" id="shName"></div>
-      <div id="shGroupBadge"></div>
-    </div>
-    <div class="stats-row">
-      <div class="stat-cell"><div class="stat-v blue" id="shRating"></div><div class="stat-l">Rating</div></div>
-      <div class="stat-cell"><div class="stat-v" id="shRank"></div><div class="stat-l">Rank</div></div>
-      <div class="stat-cell"><div class="stat-v green" id="shWinRate"></div><div class="stat-l">Win%</div></div>
-      <div class="stat-cell"><div class="stat-v" id="shPlayed"></div><div class="stat-l">Played</div></div>
-    </div>
-    <div class="form-history"><div class="form-matches" id="shMatches"></div></div>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══ FIREBASE CONFIG ═══
+// ═══ CONFIG ═══
 const firebaseConfig = {
   apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
   authDomain: "gss-ranking.firebaseapp.com",
@@ -494,157 +118,46 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ═══ STATE ═══
-const COACH_PIN = '1234';
-const TIER_PTS = { platinum: 100, gold: 60, silver: 30, bronze: 10 };
-const GROUPS = ['All', 'Open', 'U18', 'U15', 'U12'];
-
 let players = [];
 let logs = [];
-let events = [];
 let currentGroup = 'All';
-let coachUnlocked = false;
-let pinBuffer = '';
 
-// ═══ CLOUD INIT ═══
+// ═══ DATA SYNC ═══
 function initData() {
-    db.ref('players').on('value', (snap) => {
+    db.ref('players').on('value', snap => {
         const val = snap.val();
         players = val ? Object.values(val) : [];
         renderRanking();
-        if (coachUnlocked) renderCoachPanel();
+        renderCoachPanel();
+        updateSelects();
     });
-
-    db.ref('logs').on('value', (snap) => {
+    db.ref('logs').on('value', snap => {
         const val = snap.val();
-        logs = val ? Object.values(val) : [];
-        if (document.getElementById('pg-match').classList.contains('active')) renderMatchPage();
-    });
-
-    db.ref('events').on('value', (snap) => {
-        const val = snap.val();
-        events = val ? Object.values(val) : [];
-        renderEvents();
+        logs = val ? Object.entries(val).map(([id, data]) => ({id, ...data})) : [];
+        renderRecentMatches();
     });
 }
 
-// ═══ SAVE REPLACEMENT (WRITE TO CLOUD) ═══
-function syncPlayers() {
-    const data = {};
-    players.forEach(p => { data[p.name.replace(/\./g, '_')] = p; });
-    db.ref('players').set(data);
+function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// ═══ UI HELPERS ═══
-function toast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '') + ' show';
-  setTimeout(() => t.className = 'toast', 2500);
+// ═══ CORE FUNCTIONS ═══
+function addPlayer() {
+    const name = document.getElementById('newName').value.trim();
+    const group = document.getElementById('newGroup').value;
+    if(!name) return;
+    db.ref('players/' + name.replace(/\./g, '_')).set({ name, group, rating: 1000 });
+    document.getElementById('newName').value = '';
+    toast('Player Added');
 }
 
-function tab(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
-  document.getElementById('pg-' + id).classList.add('active');
-  if (el) el.classList.add('active');
-  if (id === 'match') renderMatchPage();
-}
-
-function renderGroupTabs() {
-  document.getElementById('groupTabs').innerHTML = GROUPS.map(g => `
-    <div class="g-tab ${g === currentGroup ? 'active' : ''}" onclick="setGroup('${g}')">${g}</div>
-  `).join('');
-}
-
-function setGroup(g) { currentGroup = g; renderGroupTabs(); renderRanking(); }
-
-function initials(name) { return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase(); }
-
-function renderRanking() {
-  const sorted = players.filter(p => currentGroup === 'All' || p.group === currentGroup).sort((a, b) => b.rating - a.rating);
-  if (sorted.length === 0) { document.getElementById('rankList').innerHTML = '<div class="empty-state">No players found</div>'; return; }
-
-  document.getElementById('rankList').innerHTML = sorted.map((p, i) => {
-    const cls = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
-    const matches = logs.filter(l => l.w === p.name || l.l === p.name);
-    return `
-      <div class="rank-card ${cls}" onclick="openProfile('${p.name}')">
-        <div class="r-num">${i + 1}</div>
-        <div class="r-avatar">${initials(p.name)}</div>
-        <div class="r-info">
-          <div class="r-name">${p.name}</div>
-          <div class="r-meta">${p.group} · ${matches.length} Played</div>
-        </div>
-        <div class="r-right">
-          <div class="r-pts">${Math.round(p.rating)}</div>
-          <div class="r-pts-label">Rating</div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function openProfile(name) {
-  const p = players.find(x => x.name === name);
-  const m = logs.filter(l => l.w === name || l.l === name);
-  const win = m.filter(l => l.w === name).length;
-  
-  document.getElementById('shName').textContent = p.name;
-  document.getElementById('shRating').textContent = Math.round(p.rating);
-  document.getElementById('shPlayed').textContent = m.length;
-  document.getElementById('shWinRate').textContent = m.length ? Math.round(win/m.length*100)+'%' : '0%';
-  
-  const recent = m.slice(-5).reverse();
-  document.getElementById('shMatches').innerHTML = recent.map(x => `
-    <div class="form-match">
-        <div class="fm-badge ${x.w === name ? 'w' : 'l'}">${x.w === name ? 'W' : 'L'}</div>
-        <div class="fm-opp">${x.w === name ? x.l : x.w}</div>
-        <div class="fm-diff ${x.w === name ? 'pos' : 'neg'}">${x.w === name ? '+' : '-'}${x.diff}</div>
-    </div>
-  `).join('');
-  document.getElementById('profileModal').style.display = 'flex';
-}
-
-function closeModal() { document.getElementById('profileModal').style.display = 'none'; }
-
-function renderEvents() {
-  document.getElementById('eventList').innerHTML = events.slice().reverse().map((e, i) => `
-    <div class="event-card tier-b">
-      <div class="ev-date">${e.date}</div>
-      <div class="ev-name">${e.name}</div>
-      <div class="ev-pts-badge">★ ${TIER_PTS[e.tier] || 10} pts to winner</div>
-    </div>
-  `).join('');
-}
-
-function postEvent() {
-    const name = document.getElementById('evName').value;
-    const date = document.getElementById('evDate').value;
-    const tier = document.getElementById('evTier').value;
-    if(!name || !date) return;
-    db.ref('events').push({ name, date, tier });
-    toast('Event Published');
-}
-
-function renderMatchPage() {
-    doSearch('w'); doSearch('l');
-    const evSel = document.getElementById('evSel');
-    evSel.innerHTML = '<option value="none">No Event</option>' + events.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
-    
-    const recent = logs.slice(-5).reverse();
-    document.getElementById('recentMatches').innerHTML = recent.map(m => `
-        <div class="form-match">
-            <div class="fm-opp">${m.w} def. ${m.l}</div>
-            <div class="fm-diff pos">+${m.diff}</div>
-        </div>
-    `).join('');
-}
-
-function doSearch(type) {
-    const q = document.getElementById(type === 'w' ? 'sW' : 'sL').value.toLowerCase();
-    const filtered = players.filter(p => p.name.toLowerCase().includes(q));
-    const sel = document.getElementById(type === 'w' ? 'wSel' : 'lSel');
-    sel.innerHTML = filtered.map(p => `<option value="${p.name}">${p.name} (${p.group})</option>`).join('');
+function deletePlayer(name) {
+    if(!confirm(`Delete ${name}? Data will be lost.`)) return;
+    db.ref('players/' + name.replace(/\./g, '_')).remove();
+    toast('Player Removed');
 }
 
 function submitMatch() {
@@ -657,63 +170,85 @@ function submitMatch() {
     const exp = 1 / (1 + Math.pow(10, (l.rating - w.rating) / 400));
     const diff = Math.round(32 * (1 - exp));
 
-    w.rating += diff;
-    l.rating -= diff;
-
+    // Update Scores
+    db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
+    db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
+    
+    // Log Match
     db.ref('logs').push({ w: wn, l: ln, diff, ts: Date.now() });
-    syncPlayers();
-    toast(`${wn} won +${diff} pts`);
+    toast('Result Saved');
 }
 
-// ═══ COACH LOGIC ═══
-function pinInput(d) {
-    if(pinBuffer.length < 4) pinBuffer += d;
-    updatePinDots();
-    if(pinBuffer.length === 4) {
-        if(pinBuffer === COACH_PIN) {
-            coachUnlocked = true;
-            document.getElementById('coachLock').style.display = 'none';
-            document.getElementById('coachPanel').style.display = 'block';
-            renderCoachPanel();
-        } else {
-            document.getElementById('pinError').textContent = 'Wrong PIN';
-            pinClear();
-        }
+function undoMatch(logId) {
+    const match = logs.find(l => l.id === logId);
+    if(!match || !confirm('Undo this match and revert scores?')) return;
+
+    const winner = players.find(p => p.name === match.w);
+    const loser = players.find(p => p.name === match.l);
+
+    if(winner && loser) {
+        db.ref('players/' + match.w.replace(/\./g, '_')).update({ rating: winner.rating - match.diff });
+        db.ref('players/' + match.l.replace(/\./g, '_')).update({ rating: loser.rating + match.diff });
     }
+    
+    db.ref('logs/' + logId).remove();
+    toast('Match Undone');
 }
-function pinClear() { pinBuffer = ''; updatePinDots(); }
-function pinDel() { pinBuffer = pinBuffer.slice(0, -1); updatePinDots(); }
-function updatePinDots() {
-    for(let i=0; i<4; i++) document.getElementById('pd'+i).className = i < pinBuffer.length ? 'pin-dot filled' : 'pin-dot';
+
+// ═══ RENDER ═══
+function tab(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
+    document.getElementById('pg-' + id).classList.add('active');
+    el.classList.add('active');
 }
-function lockCoach() { coachUnlocked = false; document.getElementById('coachLock').style.display = 'block'; document.getElementById('coachPanel').style.display = 'none'; pinClear(); }
+
+function renderRanking() {
+    const sorted = players.filter(p => currentGroup === 'All' || p.group === currentGroup).sort((a,b) => b.rating - a.rating);
+    document.getElementById('rankList').innerHTML = sorted.map((p, i) => `
+        <div class="rank-card ${i<3?'r1':''}">
+            <div class="r-num">${i+1}</div>
+            <div class="r-avatar">${p.name[0]}</div>
+            <div class="r-info"><div class="r-name">${p.name}</div><div style="font-size:10px;color:var(--muted2)">${p.group}</div></div>
+            <div class="r-pts">${Math.round(p.rating)}</div>
+        </div>
+    `).join('');
+    
+    const groups = ['All', 'Open', 'U18', 'U15', 'U12'];
+    document.getElementById('groupTabs').innerHTML = groups.map(g => `
+        <div class="g-tab ${currentGroup===g?'active':''}" onclick="currentGroup='${g}';renderRanking();">${g}</div>
+    `).join('');
+}
+
+function renderRecentMatches() {
+    const recent = logs.slice().reverse().slice(0, 10);
+    document.getElementById('recentMatches').innerHTML = recent.map(m => `
+        <div class="match-row">
+            <span style="font-size:13px;"><b>${m.w}</b> def. ${m.l} (+${m.diff})</span>
+            <span class="undo-btn" onclick="undoMatch('${m.id}')">✕</span>
+        </div>
+    `).join('');
+}
 
 function renderCoachPanel() {
     document.getElementById('athleteManage').innerHTML = `
         <table class="pts-table">
-            ${players.map(p => `<tr><td>${p.name}</td><td>${p.group}</td><td>${Math.round(p.rating)}</td></tr>`).join('')}
+            ${players.map(p => `
+                <tr>
+                    <td><b>${p.name}</b><br><small>${p.group}</small></td>
+                    <td align="right"><button class="danger-btn" onclick="deletePlayer('${p.name}')">Delete</button></td>
+                </tr>
+            `).join('')}
         </table>`;
 }
 
-function addPlayer() {
-    const n = document.getElementById('newName').value;
-    const g = document.getElementById('newGroup').value;
-    const s = document.getElementById('newGender').value;
-    if(!n) return;
-    db.ref('players/' + n.replace(/\./g, '_')).set({ name: n, group: g, gender: s, rating: 1000 });
-    document.getElementById('newName').value = '';
-    toast('Athlete Registered');
+function updateSelects() {
+    const opts = players.map(p => `<option value="${p.name}">${p.name} (${p.group})</option>`).join('');
+    document.getElementById('wSel').innerHTML = '<option value="">Winner...</option>' + opts;
+    document.getElementById('lSel').innerHTML = '<option value="">Opponent...</option>' + opts;
 }
 
-function resetAllRatings() {
-    if(!confirm('Reset all?')) return;
-    players.forEach(p => p.rating = 1000);
-    syncPlayers();
-}
-
-// ═══ RUN ═══
 initData();
-renderGroupTabs();
 </script>
 </body>
 </html>
