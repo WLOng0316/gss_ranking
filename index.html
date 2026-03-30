@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GSS RANKING ADVANCED</title>
+    <title>GSS RANKING WTT-EDITION</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -14,87 +14,82 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; }
         
-        header { padding: 60px 20px 15px; background: rgba(0,0,0,0.9); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); }
-        .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; font-style: italic; letter-spacing: -1px; }
-        
-        nav { position: fixed; bottom: 0; width: 100%; background: rgba(3,5,8,0.95); display: flex; border-top: 1px solid var(--line); padding: 15px 0 35px; z-index: 100; backdrop-filter: blur(15px); }
-        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
-        .nav-tab.active { color: var(--blue); }
+        header { padding: 60px 20px 10px; background: rgba(0,0,0,0.95); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); }
+        .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; font-style: italic; letter-spacing: -1px; }
 
-        .page { display: none; animation: fadeIn 0.3s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* WTT Filter Style */
+        .filter-container { background: rgba(3,5,8,0.95); position: sticky; top: 95px; z-index: 99; border-bottom: 1px solid var(--line); padding: 5px 0; backdrop-filter: blur(15px); }
+        .filter-row { display: flex; overflow-x: auto; padding: 5px 15px; gap: 8px; scrollbar-width: none; }
+        .filter-row::-webkit-scrollbar { display: none; }
+        .chip { padding: 6px 16px; border-radius: 20px; background: var(--line); color: var(--muted); font-size: 11px; font-weight: 800; white-space: nowrap; transition: 0.3s; text-transform: uppercase; border: 1px solid transparent; }
+        .chip.active { background: var(--blue); color: #000; border-color: var(--blue); }
 
-        .sec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; padding: 20px; display: flex; align-items: center; gap: 10px; }
-        .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--line); }
-        
-        /* RANKING & POPUP */
-        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 0 20px 10px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
-        .rank-card:active { transform: scale(0.97); }
-        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: var(--blue); margin-left: auto; }
+        /* Ranking Card */
+        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 0 15px 10px; display: flex; align-items: center; cursor: pointer; position: relative; }
+        .rank-num { width: 35px; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 18px; color: var(--muted); }
+        .rank-num.top3 { color: var(--blue); }
+        .player-info b { font-size: 16px; display: block; }
+        .player-info span { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: var(--blue); margin-left: auto; text-align: right; }
 
+        /* Popups */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 500; display: none; align-items: flex-end; }
-        .modal-content { width: 100%; background: #0a0e14; border-top: 3px solid var(--blue); border-radius: 25px 25px 0 0; max-height: 90vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); padding-bottom: 50px; }
+        .modal-content { width: 100%; background: #0a0e14; border-top: 3px solid var(--blue); border-radius: 25px 25px 0 0; max-height: 85vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); padding-bottom: 40px; }
         .modal-overlay.active { display: flex; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
 
-        /* GROUPING STYLE */
-        .group-box { background: var(--card); margin: 0 20px 15px; border-radius: 12px; border: 1px solid var(--line); overflow: hidden; }
-        .group-header { background: var(--line); padding: 10px 15px; font-weight: 900; color: var(--blue); font-size: 14px; display: flex; justify-content: space-between; }
-        .match-row { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; display: flex; justify-content: space-between; }
-
-        /* PIN LOCK */
-        #adminAuthLayer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 600; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; }
-        .key { width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; background: rgba(255,255,255,0.03); }
-        .dot { width: 12px; height: 12px; border: 2px solid var(--muted); border-radius: 50%; margin: 0 8px; }
-        .dot.filled { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 10px var(--blue); }
+        nav { position: fixed; bottom: 0; width: 100%; background: rgba(3,5,8,0.95); display: flex; border-top: 1px solid var(--line); padding: 15px 0 35px; z-index: 100; }
+        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .nav-tab.active { color: var(--blue); }
 
         .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line); color: #fff; padding: 14px; border-radius: 8px; margin-bottom: 10px; font-size: 15px; }
-        .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: 900; font-size: 12px; opacity: 0; transition: 0.3s; z-index: 1000; }
+        .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 8px 16px; border-radius: 20px; font-weight: 900; font-size: 12px; opacity: 0; transition: 0.3s; z-index: 1000; pointer-events: none; }
         .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
 
-<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">v13.0 ADVANCED</div></header>
+<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">PRO v14.0</div></header>
+
+<div id="filterSection" class="filter-container">
+    <div class="filter-row" id="genderFilter">
+        <div class="chip active" onclick="setGender('all', this)">All</div>
+        <div class="chip" onclick="setGender('Men', this)">Men</div>
+        <div class="chip" onclick="setGender('Women', this)">Women</div>
+    </div>
+    <div class="filter-row" id="catFilter">
+        <div class="chip active" onclick="setCat('all', this)">All Categories</div>
+        <div class="chip" onclick="setCat('U9', this)">U9</div>
+        <div class="chip" onclick="setCat('U12', this)">U12</div>
+        <div class="chip" onclick="setCat('U15', this)">U15</div>
+        <div class="chip" onclick="setCat('U19', this)">U19</div>
+        <div class="chip" onclick="setCat('Open', this)">Open</div>
+    </div>
+</div>
 
 <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div style="width: 40px; height: 4px; background: var(--line); border-radius: 2px; margin: 15px auto;"></div>
-        <div id="modalBody"></div>
-    </div>
+    <div class="modal-content" onclick="event.stopPropagation()"><div id="modalBody"></div></div>
 </div>
 
-<div id="adminAuthLayer">
-    <div style="color:var(--muted); font-weight:700; letter-spacing:2px; margin-bottom:20px;">ENTER COACH PIN</div>
-    <div style="display:flex;"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-    <div class="keypad">
-        <script>for(let i=1;i<=9;i++) document.write(`<div class="key" onclick="pressKey('${i}')">${i}</div>`);</script>
-        <div class="key" style="border:none; color:var(--red); font-size:14px" onclick="clearPin()">ESC</div>
-        <div class="key" onclick="pressKey('0')">${0}</div>
-        <div class="key" style="border:none; color:var(--blue); font-size:14px" onclick="delPin()">DEL</div>
-    </div>
+<div id="adminAuthLayer" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:600; display:none; flex-direction:column; align-items:center; justify-content:center;">
+    <div style="color:var(--muted); font-weight:700; margin-bottom:20px;">COACH ACCESS</div>
+    <div id="pinDots" style="display:flex; gap:10px; margin-bottom:30px;"><script>for(let i=0;i<4;i++) document.write(`<div style="width:12px; height:12px; border:2px solid var(--muted); border-radius:50%"></div>`)</script></div>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px;" id="keypad"></div>
 </div>
 
-<div id="pg-ranking" class="page active"><div class="sec-title">Elite Ranking Standings</div><div id="rankList"></div></div>
-<div id="pg-events" class="page"><div class="sec-title">Tournament & Grouping</div><div id="eventList"></div></div>
-
+<div id="pg-ranking" class="page active"><div id="rankList" style="padding-top:10px"></div></div>
+<div id="pg-events" class="page"><div id="eventList"></div></div>
 <div id="pg-coach" class="page">
-    <div id="adminMain" style="display:none; padding: 0 20px;">
-        <div class="sec-title" style="padding:10px 0">Fast Score Entry</div>
+    <div id="adminMain" style="display:none; padding:20px;">
         <select id="wSel" class="wtt-select"></select>
         <select id="lSel" class="wtt-select"></select>
-        <div id="scoreInputs">
-            <script>for(let i=1;i<=5;i++) document.write(`<div style="display:grid; grid-template-columns: 50px 1fr 1fr; gap:10px; margin-bottom:8px;"><div style="font-size:10px; color:var(--muted)">SET ${i}</div><input type="number" id="s${i}w" class="wtt-input" placeholder="W" style="margin:0"><input type="number" id="s${i}l" class="wtt-input" placeholder="L" style="margin:0"></div>`);</script>
-        </div>
-        <button onclick="submitMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:16px; border-radius:8px; font-weight:900;">SAVE RESULT</button>
-
-        <div class="sec-title" style="padding:20px 0">Database Management</div>
-        <input type="text" id="newName" class="wtt-input" placeholder="Athlete Name">
-        <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
-        <button onclick="addPlayer()" style="width:100%; background:var(--blue); padding:14px; border:none; border-radius:8px; font-weight:900;">ADD ATHLETE</button>
+        <button onclick="submitMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:8px; font-weight:900; margin-bottom:30px;">RECORD MATCH</button>
         
+        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">ADD NEW PLAYER</div>
+        <input type="text" id="newName" class="wtt-input" placeholder="Full Name">
+        <select id="newGender" class="wtt-select"><option value="Men">Men</option><option value="Women">Women</option></select>
+        <select id="newCat" class="wtt-select"><option value="Open">Open</option><option value="U19">U19</option><option value="U15">U15</option><option value="U12">U12</option><option value="U9">U9</option></select>
+        <button onclick="addPlayer()" style="width:100%; background:var(--text); color:#000; border:none; padding:15px; border-radius:8px; font-weight:900;">CREATE PROFILE</button>
         <div id="adminPlayerList" style="margin-top:20px"></div>
     </div>
 </div>
@@ -107,7 +102,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// --- CONFIG & DB ---
 const firebaseConfig = {
     apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
     authDomain: "gss-ranking.firebaseapp.com",
@@ -121,93 +115,75 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let players = [], logs = [], events = [], pinInput = "", isAdmin = false;
+let curGender = 'all', curCat = 'all';
 
 function init() {
     db.ref('players').on('value', s => { players = s.val() ? Object.values(s.val()) : []; renderRanking(); updateSelects(); renderAdminList(); });
-    db.ref('logs').on('value', s => { logs = s.val() ? Object.entries(s.val()).map(([id, d]) => ({id, ...d})) : []; });
+    db.ref('logs').on('value', s => { logs = s.val() ? Object.values(s.val()) : []; });
     db.ref('events').on('value', s => { events = s.val() ? Object.entries(s.val()).map(([id, d]) => ({id, ...d})) : []; renderEvents(); });
+    setupKeypad();
 }
 
-// --- ELO LOGIC 进阶 (K-FACTOR) ---
-function getKFactor(pName) {
-    const pMatches = logs.filter(l => l.w === pName || l.l === pName).length;
-    if(pMatches < 5) return 64; // 新手快速定级
-    if(pMatches > 25) return 16; // 老手分数稳定
-    return 32; // 标准
-}
-
-// --- GROUPING LOGIC (蛇形排列) ---
-function generateAutoGroups(participants) {
-    const sorted = [...participants].sort((a,b) => {
-        const rA = players.find(x => x.name === a.name)?.rating || 0;
-        const rB = players.find(x => x.name === b.name)?.rating || 0;
-        return rB - rA;
-    });
-    
-    let groups = [[], []]; // 默认分 A, B 两组
-    sorted.forEach((p, i) => {
-        // 蛇形填充：0,1,1,0,0,1...
-        const gIdx = (Math.floor(i / 1) % 4 === 0 || Math.floor(i / 1) % 4 === 3) ? 0 : 1;
-        groups[i % 2].push(p.name);
-    });
-    return groups;
-}
-
-// --- UI HANDLERS ---
-function tab(id, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
-    document.getElementById('pg-' + id).classList.add('active');
+// --- FILTER LOGIC ---
+function setGender(val, el) {
+    curGender = val;
+    document.querySelectorAll('#genderFilter .chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
-    if(id === 'coach' && !isAdmin) { document.getElementById('adminAuthLayer').style.display = 'flex'; pinInput = ""; updateDots(); }
+    renderRanking();
 }
 
-function pressKey(n) {
-    if(pinInput.length < 4) {
-        pinInput += n; updateDots();
-        if(pinInput === "8888") {
-            isAdmin = true; document.getElementById('adminAuthLayer').style.display = 'none';
-            document.getElementById('adminMain').style.display = 'block';
-            document.getElementById('statusLabel').textContent = "COACH MODE";
-            document.getElementById('statusLabel').style.color = "var(--blue)";
-        } else if(pinInput.length === 4) { toast("WRONG PIN"); pinInput = ""; updateDots(); }
-    }
+function setCat(val, el) {
+    curCat = val;
+    document.querySelectorAll('#catFilter .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    renderRanking();
 }
-function updateDots() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('filled', i < pinInput.length)); }
-function clearPin() { document.getElementById('adminAuthLayer').style.display = 'none'; tab('ranking', document.querySelector('.nav-tab')); }
-function delPin() { pinInput = pinInput.slice(0,-1); updateDots(); }
+
+function renderRanking() {
+    let filtered = [...players];
+    if(curGender !== 'all') filtered = filtered.filter(p => p.gender === curGender);
+    if(curCat !== 'all') filtered = filtered.filter(p => p.category === curCat);
+    
+    // Sort by rating
+    filtered.sort((a,b) => b.rating - a.rating);
+
+    const html = filtered.map((p, i) => `
+        <div class="rank-card" onclick="openPlayerDetail('${p.name}')">
+            <div class="rank-num ${i<3?'top3':''}">${i+1}</div>
+            <div class="player-info">
+                <b>${p.name}</b>
+                <span>${p.gender} | ${p.category}</span>
+            </div>
+            <div class="r-pts">${Math.round(p.rating)}<div style="font-size:8px; color:var(--muted)">PTS</div></div>
+        </div>
+    `).join('');
+    document.getElementById('rankList').innerHTML = html || '<div style="text-align:center; padding:50px; color:var(--muted)">No players found in this category</div>';
+}
 
 // --- PLAYER DETAILS ---
 function openPlayerDetail(name) {
     const p = players.find(x => x.name === name);
-    const pLogs = logs.filter(l => l.w === name || l.l === name).reverse();
-    const avgOpponent = pLogs.length ? Math.round(pLogs.reduce((acc, curr) => {
-        const opp = curr.w === name ? curr.l : curr.w;
-        return acc + (players.find(x => x.name === opp)?.rating || 1000);
-    }, 0) / pLogs.length) : 1000;
-
+    const pLogs = logs.filter(l => l.w === name || l.l === name).reverse().slice(0,8);
+    
     let html = `
-        <div style="padding: 30px 20px;">
-            <div style="font-size:28px; font-weight:900; margin-bottom:5px;">${name}</div>
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <span style="background:var(--blue); color:#000; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:900;">${p.group}</span>
-                <span style="color:var(--muted); font-size:11px;">AVG OPPONENT: ${avgOpponent}</span>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-                <div style="background:var(--line); padding:15px; border-radius:10px; text-align:center;">
-                    <div style="font-size:24px; font-weight:900; color:var(--blue)">${Math.round(p.rating)}</div>
-                    <div style="font-size:9px; color:var(--muted)">ELO RATING</div>
+        <div style="padding:30px 20px;">
+            <div style="font-size:10px; color:var(--blue); letter-spacing:2px; font-weight:800;">PLAYER PROFILE</div>
+            <div style="font-size:32px; font-weight:900; margin:5px 0 15px;">${name}</div>
+            <div style="display:flex; gap:10px; margin-bottom:25px;">
+                <div style="background:var(--line); padding:10px 20px; border-radius:10px; flex:1">
+                    <div style="font-size:22px; font-weight:900; color:var(--blue)">${Math.round(p.rating)}</div>
+                    <div style="font-size:9px; color:var(--muted)">RATING</div>
                 </div>
-                <div style="background:var(--line); padding:15px; border-radius:10px; text-align:center;">
-                    <div style="font-size:24px; font-weight:900;">${pLogs.filter(l => l.w === name).length}W - ${pLogs.filter(l => l.l === name).length}L</div>
-                    <div style="font-size:9px; color:var(--muted)">RECORD</div>
+                <div style="background:var(--line); padding:10px 20px; border-radius:10px; flex:1">
+                    <div style="font-size:22px; font-weight:900;">${p.category}</div>
+                    <div style="font-size:9px; color:var(--muted)">CATEGORY</div>
                 </div>
             </div>
-            <div class="sec-title">Match History</div>
-            ${pLogs.slice(0,10).map(m => `
-                <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.03); margin-bottom:8px; border-radius:8px; border-left:3px solid ${m.w === name ? 'var(--blue)' : 'var(--red)'}">
-                    <div><div style="font-weight:700">vs ${m.w === name ? m.l : m.w}</div><div style="font-size:10px; color:var(--muted)">${m.score}</div></div>
-                    <div style="text-align:right; font-weight:900; color:${m.w === name ? 'var(--blue)' : 'var(--red)'}">${m.w === name ? '+' : '-'}${m.diff}</div>
+            <div style="font-size:11px; font-weight:800; color:var(--muted); margin-bottom:10px;">RECENT ACTIVITY</div>
+            ${pLogs.map(m => `
+                <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.03); margin-bottom:8px; border-radius:8px; border-left:3px solid ${m.w === name?'var(--blue)':'var(--red)'}">
+                    <div><div style="font-weight:700">vs ${m.w === name?m.l:m.w}</div><div style="font-size:10px; color:var(--muted)">${m.score||'N/A'}</div></div>
+                    <div style="font-weight:900; color:${m.w===name?'var(--blue)':'var(--red)'}">${m.w===name?'+':'-'}${m.diff}</div>
                 </div>
             `).join('')}
         </div>
@@ -216,100 +192,73 @@ function openPlayerDetail(name) {
     document.getElementById('modalOverlay').classList.add('active');
 }
 
-// --- EVENT & AUTO GROUPING ---
-function openEventDetail(id) {
-    const ev = events.find(x => x.id === id);
-    const participants = ev.participants ? Object.values(ev.participants) : [];
-    
-    let html = `
-        <div style="padding:30px 20px;">
-            <div style="font-size:11px; color:var(--blue); font-family:'Share Tech Mono'">${ev.date}</div>
-            <div style="font-size:26px; font-weight:900; margin-bottom:20px;">${ev.name}</div>
-            <button onclick="registerEvent('${id}')" style="width:100%; background:var(--blue); color:#000; padding:15px; border:none; border-radius:8px; font-weight:900; margin-bottom:10px;">JOIN TOURNAMENT</button>
-            
-            <div class="sec-title">Seeded Groups (Auto-Generated)</div>
-    `;
+// --- ADMIN & CORE ---
+function setupKeypad() {
+    let h = ''; for(let i=1;i<=9;i++) h += `<div class="key" onclick="pressKey('${i}')" style="width:70px; height:70px; border:1px solid var(--line); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800;">${i}</div>`;
+    h += `<div style="text-align:center; padding-top:25px; color:var(--red)" onclick="clearPin()">ESC</div>`;
+    h += `<div class="key" onclick="pressKey('0')" style="width:70px; height:70px; border:1px solid var(--line); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800;">0</div>`;
+    h += `<div style="text-align:center; padding-top:25px; color:var(--blue)" onclick="delPin()">DEL</div>`;
+    document.getElementById('keypad').innerHTML = h;
+}
 
-    if(participants.length >= 4) {
-        const groups = generateAutoGroups(participants);
-        groups.forEach((g, i) => {
-            html += `
-                <div class="group-box">
-                    <div class="group-header">GROUP ${String.fromCharCode(65+i)} <span>${g.length} PLAYERS</span></div>
-                    ${g.map(pName => `<div class="match-row"><b>${pName}</b> <span>${Math.round(players.find(x => x.name === pName)?.rating || 1000)} pts</span></div>`).join('')}
-                    <div style="padding:10px; font-size:10px; color:var(--muted); background:rgba(0,0,0,0.2)">SUGGESTED: 1 vs 4, 2 vs 3</div>
-                </div>`;
-        });
-    } else {
-        html += `<div style="text-align:center; padding:20px; color:var(--muted)">Need at least 4 players for grouping</div>`;
+function tab(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
+    document.getElementById('pg-' + id).classList.add('active'); el.classList.add('active');
+    document.getElementById('filterSection').style.display = (id === 'ranking' ? 'block' : 'none');
+    if(id === 'coach' && !isAdmin) document.getElementById('adminAuthLayer').style.display = 'flex';
+}
+
+function pressKey(n) {
+    if(pinInput.length < 4) {
+        pinInput += n; updatePinDots();
+        if(pinInput === "8888") {
+            isAdmin = true; document.getElementById('adminAuthLayer').style.display = 'none';
+            document.getElementById('adminMain').style.display = 'block';
+        } else if(pinInput.length === 4) { toast("WRONG PIN"); pinInput = ""; updatePinDots(); }
     }
-
-    document.getElementById('modalBody').innerHTML = html;
-    document.getElementById('modalOverlay').classList.add('active');
 }
-
-// --- ACTIONS ---
-function submitMatch() {
-    const wn = document.getElementById('wSel').value, ln = document.getElementById('lSel').value;
-    if(!wn || !ln || wn === ln) return toast("Invalid Players");
-    
-    let sc = []; for(let i=1;i<=5;i++){ let w=document.getElementById(`s${i}w`).value, l=document.getElementById(`s${i}l`).value; if(w!=""&&l!="") sc.push(`${w}-${l}`); }
-    
-    const w = players.find(p => p.name === wn), l = players.find(p => p.name === ln);
-    const kw = getKFactor(wn), kl = getKFactor(ln);
-    
-    const expected = 1 / (1 + Math.pow(10, (l.rating - w.rating) / 400));
-    const diff = Math.round(kw * (1 - expected));
-
-    db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
-    db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
-    db.ref('logs').push({ w: wn, l: ln, diff, score: sc.join(', '), ts: Date.now() });
-    toast("SCORE SAVED & ELO UPDATED");
-}
-
-function registerEvent(id) {
-    const userP = prompt("Enter Player Name:");
-    if(!userP || !players.find(x => x.name === userP)) return toast("Player not found");
-    db.ref(`events/${id}/participants`).push({ name: userP, group: players.find(x => x.name === userP).group });
-    toast("REGISTERED"); setTimeout(() => openEventDetail(id), 500);
-}
+function updatePinDots() { document.querySelectorAll('#pinDots div').forEach((d, i) => d.style.background = i < pinInput.length ? 'var(--blue)' : 'none'); }
+function clearPin() { document.getElementById('adminAuthLayer').style.display = 'none'; tab('ranking', document.querySelector('.nav-tab')); }
+function delPin() { pinInput = pinInput.slice(0,-1); updatePinDots(); }
 
 function addPlayer() {
     const n = document.getElementById('newName').value.trim();
     if(!n) return;
-    db.ref('players/' + n.replace(/\./g, '_')).set({ name: n, group: document.getElementById('newGroup').value, rating: 1000 });
+    db.ref('players/' + n.replace(/\./g, '_')).set({
+        name: n, gender: document.getElementById('newGender').value,
+        category: document.getElementById('newCat').value, rating: 1000
+    });
     document.getElementById('newName').value = ""; toast("ATHLETE CREATED");
 }
 
-function renderRanking() {
-    const sorted = [...players].sort((a,b) => b.rating - a.rating);
-    document.getElementById('rankList').innerHTML = sorted.map((p, i) => `
-        <div class="rank-card" onclick="openPlayerDetail('${p.name}')">
-            <div style="width:25px; color:var(--muted); font-weight:900;">${i+1}</div>
-            <div><div style="font-weight:700;">${p.name}</div><div style="font-size:10px; color:var(--muted)">${p.group}</div></div>
-            <div class="r-pts">${Math.round(p.rating)}</div>
-        </div>`).join('');
+function submitMatch() {
+    const wn = document.getElementById('wSel').value, ln = document.getElementById('lSel').value;
+    if(!wn || !ln || wn === ln) return toast("Invalid selection");
+    const w = players.find(p => p.name === wn), l = players.find(p => p.name === ln);
+    const diff = Math.round(32 * (1 - (1 / (1 + Math.pow(10, (l.rating - w.rating) / 400)))));
+    db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
+    db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
+    db.ref('logs').push({ w: wn, l: ln, diff, ts: Date.now() });
+    toast("SCORE SAVED");
 }
 
 function renderEvents() {
     document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
-        <div class="rank-card" onclick="openEventDetail('${e.id}')">
-            <div><div style="color:var(--blue); font-size:10px; font-family:'Share Tech Mono'">${e.date}</div><div style="font-weight:900; font-size:18px">${e.name}</div></div>
-            <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
-                ${isAdmin ? `<span style="color:var(--red); font-size:12px;" onclick="event.stopPropagation(); if(confirm('Del?')) db.ref('events/${e.id}').remove();">DEL</span>` : ''}
-                <span style="color:var(--muted)">→</span>
-            </div>
-        </div>`).join('');
+        <div class="rank-card">
+            <div><div style="color:var(--blue); font-size:10px;">${e.date}</div><div style="font-weight:900; font-size:18px">${e.name}</div></div>
+            <div style="margin-left:auto; color:var(--muted)">→</div>
+        </div>
+    `).join('');
 }
 
 function renderAdminList() {
-    document.getElementById('adminPlayerList').innerHTML = players.map(p => `<div style="display:flex; justify-content:space-between; padding:10px; background:var(--card); margin-bottom:5px; border-radius:8px; font-size:13px;"><span>${p.name}</span><span style="color:var(--red)" onclick="if(confirm('Del?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">REMOVE</span></div>`).join('');
+    document.getElementById('adminPlayerList').innerHTML = players.map(p => `<div style="display:flex; justify-content:space-between; padding:10px; background:var(--card); margin-bottom:5px; border-radius:8px; font-size:12px;"><span>${p.name} (${p.gender})</span><span style="color:var(--red)" onclick="db.ref('players/${p.name.replace(/\./g,'_')}').remove()">DEL</span></div>`).join('');
 }
 
 function updateSelects() {
     const h = players.map(p => `<option value="${p.name}">${p.name}</option>`).sort().join('');
-    document.getElementById('wSel').innerHTML = '<option value="">Winner...</option>' + h;
-    document.getElementById('lSel').innerHTML = '<option value="">Loser...</option>' + h;
+    document.getElementById('wSel').innerHTML = h; document.getElementById('lSel').innerHTML = h;
 }
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
