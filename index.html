@@ -3,79 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GSS RANKING - ULTIMATE PRO</title>
+    <title>GSS RANKING - EVENT PRO</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,900;1,900&family=Barlow:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,900;1,900&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        :root { --blue: #00d4ff; --red: #ff3b3b; --bg: #030508; --card: #12161f; --line: #1c2230; --text: #e8edf5; --muted: #4e5b73; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        :root { --blue: #00d4ff; --red: #ff3b3b; --bg: #030508; --card: #12161f; --line: #1c2230; --text: #e8edf5; --muted: #4e5b73; --gold: #ffd700; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; overflow-x: hidden; }
         
-        /* Layout Elements */
-        header { padding: 60px 20px 10px; background: rgba(0,0,0,0.95); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--line); }
-        .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; font-style: italic; letter-spacing: -1px; }
+        header { padding: 60px 20px 10px; background: rgba(0,0,0,0.95); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--line); }
+        .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; font-style: italic; }
 
+        /* Filter Section */
         .filter-section { background: rgba(3,5,8,0.9); position: sticky; top: 96px; z-index: 99; border-bottom: 1px solid var(--line); padding: 8px 0; backdrop-filter: blur(10px); }
         .filter-row { display: flex; overflow-x: auto; padding: 4px 15px; gap: 8px; scrollbar-width: none; }
-        .filter-row::-webkit-scrollbar { display: none; }
         .chip { padding: 6px 18px; border-radius: 20px; background: var(--line); color: var(--muted); font-size: 11px; font-weight: 800; white-space: nowrap; text-transform: uppercase; border: 1px solid transparent; }
-        .chip.active { background: var(--blue); color: #000; border-color: var(--blue); box-shadow: 0 0 15px rgba(0,212,255,0.2); }
+        .chip.active { background: var(--blue); color: #000; border-color: var(--blue); }
 
-        /* Card Styles */
-        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 0 15px 10px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
-        .rank-num { width: 40px; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px; color: var(--muted); font-style: italic; }
-        .rank-num.top3 { color: var(--blue); }
-        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: var(--blue); margin-left: auto; }
+        /* Event Dashboard Specific */
+        .event-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .event-tool-card { background: linear-gradient(145deg, #1a1f29, #12161f); padding: 20px; border-radius: 15px; border: 1px solid var(--line); text-align: center; }
+        .event-tool-card i { font-size: 24px; display: block; margin-bottom: 10px; }
+        
+        .entry-item { display: flex; align-items: center; padding: 12px; background: #0a0e14; border-radius: 10px; margin-bottom: 8px; border-left: 3px solid var(--muted); }
+        .entry-item.seed { border-left-color: var(--blue); background: rgba(0,212,255,0.05); }
 
-        /* Modal & UI Details */
+        /* Modal Structure */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 500; display: none; align-items: flex-end; }
-        .modal-content { width: 100%; background: #000; border-top: 2px solid var(--blue); border-radius: 30px 30px 0 0; max-height: 94vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-content { width: 100%; background: #000; border-top: 2px solid var(--blue); border-radius: 30px 30px 0 0; height: 95vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .modal-overlay.active { display: flex; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
 
-        .profile-bg-text { position: absolute; top: -10px; right: -10px; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 110px; color: rgba(255,255,255,0.03); font-style: italic; pointer-events: none; z-index: 0; }
-        .chart-container { background: #0a0e14; padding: 15px; border-radius: 15px; margin: 15px 0; border: 1px solid var(--line); }
+        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 0 15px 10px; display: flex; align-items: center; cursor: pointer; }
+        .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: var(--blue); margin-left: auto; }
 
-        .h2h-bar { height: 8px; background: var(--red); border-radius: 4px; overflow: hidden; display: flex; margin: 10px 0; }
-        .h2h-win-fill { background: var(--blue); height: 100%; transition: 0.5s; }
-
-        .history-card { background: #12161f; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; border: 1px solid var(--line); font-size: 13px; }
-        .tag { font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; margin-right: 8px; }
-        .tag-win { background: var(--blue); color: #000; }
-        .tag-loss { background: var(--red); color: #fff; }
-
-        /* Admin PIN */
-        #adminAuth { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 600; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .pin-dot { width: 14px; height: 14px; border: 2px solid var(--line); border-radius: 50%; margin: 0 8px; }
-        .pin-dot.filled { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 10px var(--blue); }
-        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; }
-        .key { width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; background: rgba(255,255,255,0.02); }
-
-        .wtt-input, .wtt-select { width: 100%; background: #1a1f29; border: 1px solid var(--line); color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 12px; font-family: 'Barlow'; }
         nav { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); display: flex; border-top: 1px solid var(--line); padding: 15px 0 35px; z-index: 100; backdrop-filter: blur(15px); }
-        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
         .nav-tab.active { color: var(--blue); }
+
         .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 10px 25px; border-radius: 30px; font-weight: 900; font-size: 12px; opacity: 0; transition: 0.3s; z-index: 1000; }
         .toast.show { opacity: 1; }
         .page { display: none; }
         .page.active { display: block; }
+        .wtt-input, .wtt-select { width: 100%; background: #1a1f29; border: 1px solid var(--line); color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
 
-<header><div class="logo">GSS <span style="color:var(--blue)">PRO</span></div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">SYSTEM READY</div></header>
+<header><div class="logo">GSS <span style="color:var(--blue)">PRO</span></div></header>
 
 <div id="filterArea" class="filter-section">
-    <div class="filter-row" id="g-filters">
+    <div class="filter-row">
         <div class="chip active" onclick="setGender('all', this)">All</div>
         <div class="chip" onclick="setGender('Men', this)">Men</div>
         <div class="chip" onclick="setGender('Women', this)">Women</div>
     </div>
-    <div class="filter-row" id="c-filters">
+    <div class="filter-row">
         <div class="chip active" onclick="setCat('all', this)">All Categories</div>
         <div class="chip" onclick="setCat('U9', this)">U9</div><div class="chip" onclick="setCat('U12', this)">U12</div><div class="chip" onclick="setCat('U15', this)">U15</div><div class="chip" onclick="setCat('U19', this)">U19</div><div class="chip" onclick="setCat('Open', this)">Open</div>
     </div>
@@ -85,33 +72,21 @@
     <div class="modal-content" onclick="event.stopPropagation()"><div id="modalBody"></div></div>
 </div>
 
-<div id="adminAuth">
-    <div style="font-family:'Barlow Condensed'; font-weight:900; margin-bottom:30px;">COACH ENTRANCE</div>
-    <div style="display:flex; margin-bottom:40px;"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div>
-    <div class="keypad">
-        <script>for(let i=1;i<=9;i++) document.write(`<div class="key" onclick="pressKey('${i}')">${i}</div>`);</script>
-        <div class="key" style="border:none; color:var(--red); font-size:14px" onclick="cancelAdmin()">ESC</div>
-        <div class="key" onclick="pressKey('0')">0</div>
-        <div class="key" style="border:none; color:var(--blue); font-size:14px" onclick="delPin()">DEL</div>
-    </div>
-</div>
-
 <div id="pg-ranking" class="page active"><div id="rankList"></div></div>
 <div id="pg-events" class="page"><div id="eventList"></div></div>
 <div id="pg-coach" class="page">
-    <div id="adminView" style="display:none; padding: 20px;">
-        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">TOURNAMENT SETUP</div>
+    <div id="adminAuth" style="padding:50px 20px; text-align:center;">
+        <div id="pinDots" style="margin-bottom:30px;">••••</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; max-width:250px; margin:0 auto;">
+            <script>for(let i=1;i<=9;i++) document.write(`<button onclick="pressKey('${i}')" style="background:var(--line); color:#fff; border:none; border-radius:50%; width:60px; height:60px; font-size:20px;">${i}</button>`);</script>
+            <button onclick="pressKey('0')" style="grid-column:2; background:var(--line); color:#fff; border:none; border-radius:50%; width:60px; height:60px; font-size:20px;">0</button>
+        </div>
+    </div>
+    <div id="adminView" style="display:none; padding:20px;">
         <input type="text" id="evName" class="wtt-input" placeholder="Tournament Name">
         <input type="date" id="evDate" class="wtt-input">
-        <button onclick="createEvent()" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:12px; font-weight:900; margin-bottom:30px;">OPEN REGISTRATION</button>
-
-        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">SUBMIT MATCH SCORE</div>
-        <select id="wSel" class="wtt-select"></select>
-        <select id="lSel" class="wtt-select"></select>
-        <button onclick="saveMatch()" style="width:100%; background:var(--text); color:#000; border:none; padding:15px; border-radius:12px; font-weight:900; margin-bottom:30px;">SAVE DATA</button>
-        
-        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">ATHLETE REGISTRY</div>
-        <div id="adminPlayerList"></div>
+        <button onclick="createEvent()" style="width:100%; background:var(--blue); padding:15px; border-radius:12px; font-weight:900; border:none;">CREATE EVENT</button>
+        <div id="adminPlayerList" style="margin-top:20px;"></div>
     </div>
 </div>
 
@@ -135,14 +110,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let players = [], logs = [], events = [], pin = "", isCoach = false, performanceChart = null;
+let players = [], logs = [], events = [], pin = "", isCoach = false;
 let curG = 'all', curC = 'all';
 
 function init() {
-    db.ref('players').on('value', s => { 
-        players = s.val() ? Object.values(s.val()) : []; 
-        renderRanking(); updateSelects(); renderAdminList(); 
-    });
+    db.ref('players').on('value', s => { players = s.val() ? Object.values(s.val()) : []; renderRanking(); renderAdminList(); });
     db.ref('logs').on('value', s => { logs = s.val() ? Object.values(s.val()) : []; });
     db.ref('events').on('value', s => { 
         const val = s.val();
@@ -151,289 +123,190 @@ function init() {
     });
 }
 
-// --- CORE LOGIC: RANKING & CHART ---
-function renderRanking() {
-    let list = players.filter(p => (curG==='all' || (p.gender||'Men')===curG) && (curC==='all' || (p.category||'Open')===curC)).sort((a,b)=>b.rating-a.rating);
-    document.getElementById('rankList').innerHTML = list.map((p,i)=>`
-        <div class="rank-card" onclick="showDetail('${p.name}')">
-            <div class="rank-num ${i<3?'top3':''}">${i+1}</div>
-            <div><div style="font-weight:700">${p.name}</div><div style="font-size:10px; color:var(--muted)">${p.gender||'Men'} | ${p.category||'Open'}</div></div>
-            <div class="r-pts">${Math.round(p.rating)}</div>
-        </div>
-    `).join('') || '<div style="text-align:center; padding:50px; color:var(--muted)">Searching for data...</div>';
-}
-
-function showDetail(name) {
-    const p = players.find(x => x.name === name);
-    const pLogs = logs.filter(l => l.w === name || l.l === name);
-    const wins = pLogs.filter(l => l.w === name).length;
-    
-    // 计算积分趋势 (取最后10场)
-    let currentRating = p.rating;
-    let historyPoints = [Math.round(currentRating)];
-    [...pLogs].reverse().slice(0, 10).forEach(l => {
-        if(l.w === name) currentRating -= l.diff;
-        else currentRating += l.diff;
-        historyPoints.unshift(Math.round(currentRating));
-    });
-
-    document.getElementById('modalBody').innerHTML = `
-        <div class="profile-bg-text">${name.split(' ')[0]}</div>
-        <div style="padding:40px 25px 25px; position:relative; z-index:1">
-            <div style="font-size:10px; font-weight:900; background:var(--blue); color:#000; padding:2px 8px; border-radius:3px; display:inline-block; margin-bottom:10px">PRO PROFILE</div>
-            <div style="font-size:36px; font-family:'Barlow Condensed'; font-weight:900; text-transform:uppercase; line-height:1">${name}</div>
-            <div style="color:var(--blue); font-size:14px; font-weight:600; margin:5px 0 25px">${p.gender} | ${p.category}</div>
-
-            <div class="chart-container">
-                <canvas id="ratingChart"></canvas>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:25px">
-                <div style="background:var(--line); padding:15px; border-radius:12px">
-                    <div style="font-size:10px; color:var(--muted)">CURRENT ELO</div>
-                    <div style="font-size:28px; font-family:'Barlow Condensed'; font-weight:900; color:var(--blue)">${Math.round(p.rating)}</div>
-                </div>
-                <div style="background:var(--line); padding:15px; border-radius:12px">
-                    <div style="font-size:10px; color:var(--muted)">WIN RATE</div>
-                    <div style="font-size:28px; font-family:'Barlow Condensed'; font-weight:900">${pLogs.length ? Math.round((wins/pLogs.length)*100) : 0}%</div>
-                </div>
-            </div>
-
-            <div style="font-size:11px; color:var(--muted); margin-bottom:10px; font-weight:700">RECENT PERFORMANCE</div>
-            ${pLogs.reverse().slice(0,6).map(m => `
-                <div class="history-card">
-                    <div style="display:flex; align-items:center">
-                        <span class="tag ${m.w===name?'tag-win':'tag-loss'}">${m.w===name?'WIN':'LOSS'}</span>
-                        <span style="font-weight:600">vs ${m.w===name?m.l:m.w}</span>
-                    </div>
-                    <span style="font-family:'Barlow Condensed'; font-weight:900; color:${m.w===name?'var(--blue)':'var(--red)'}">${m.w===name?'+':''}${m.diff}</span>
-                </div>
-            `).join('')}
-        </div>`;
-    
-    document.getElementById('modalOverlay').classList.add('active');
-    
-    // 初始化图表
-    setTimeout(() => {
-        const ctx = document.getElementById('ratingChart').getContext('2d');
-        if(performanceChart) performanceChart.destroy();
-        performanceChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: historyPoints.map((_, i) => i + 1),
-                datasets: [{
-                    label: 'Rating',
-                    data: historyPoints,
-                    borderColor: '#00d4ff',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    fill: true,
-                    backgroundColor: 'rgba(0,212,255,0.05)'
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#1c2230' }, ticks: { color: '#4e5b73', font: { size: 10 } } } } }
-        });
-    }, 100);
-}
-
-// --- ADVANCED EVENT & H2H LOGIC ---
-function renderEvents() {
-    document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
-        <div class="rank-card" onclick="showEventDetail('${e.id}')">
-            <div>
-                <div style="color:var(--blue); font-size:10px; font-family:'Share Tech Mono'">${e.date || 'TBA'}</div>
-                <div style="font-weight:900; font-size:20px">${e.name}</div>
-            </div>
-            <div style="margin-left:auto; color:var(--muted)">DETAIL →</div>
-        </div>
-    `).join('') || '<div style="text-align:center; padding:50px; color:var(--muted)">No upcoming events.</div>';
-}
-
-function showEventDetail(id) {
-    const e = events.find(x => x.id === id);
-    const regs = e.regs ? Object.values(e.regs) : [];
-    document.getElementById('modalBody').innerHTML = `
-        <div style="padding:35px 25px;">
-            <div style="font-size:10px; color:var(--blue); font-weight:900; letter-spacing:2px">TOURNAMENT HQ</div>
-            <div style="font-size:32px; font-weight:900; margin-bottom:25px">${e.name}</div>
-            
-            <div style="margin-bottom:30px">
-                <div style="font-size:11px; color:var(--muted); margin-bottom:10px">QUICK JOIN</div>
-                <select id="regSelect" class="wtt-select">
-                    <option value="">Select Athlete...</option>
-                    ${players.map(p => `<option value="${p.name}">${p.name} (${p.category})</option>`).join('')}
-                </select>
-                <button onclick="registerEvent('${id}')" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:12px; font-weight:900;">REGISTER</button>
-            </div>
-
-            <div style="margin-bottom:30px">
-                <div style="font-size:11px; color:var(--muted); margin-bottom:15px">FIXTURES & H2H (Tap to Analyze)</div>
-                <div id="drawContainer">
-                    ${e.fixtures ? e.fixtures.map(f => `
-                        <div class="history-card" style="margin-bottom:10px; cursor:pointer" onclick="showH2H('${f.p1}','${f.p2}')">
-                            <span style="font-weight:700">${f.p1}</span>
-                            <span style="color:var(--muted); font-size:10px">VS</span>
-                            <span style="font-weight:700">${f.p2}</span>
-                        </div>
-                    `).join('') : '<div style="font-size:12px; color:var(--muted)">Wait for Admin to generate draw.</div>'}
-                </div>
-                ${isCoach && regs.length >= 2 ? `<button onclick="generateSeededDraw('${id}')" style="width:100%; background:none; border:1px solid var(--blue); color:var(--blue); padding:12px; border-radius:12px; margin-top:15px; font-size:11px; font-weight:700;">ADMIN: SEEDED DRAW (S1 vs S2)</button>` : ''}
-            </div>
-        </div>
-    `;
-    document.getElementById('modalOverlay').classList.add('active');
-}
-
-function showH2H(p1, p2) {
-    if(p1 === "BYE" || p2 === "BYE") return;
-    const matches = logs.filter(l => (l.w===p1 && l.l===p2) || (l.w===p2 && l.l===p1));
-    const p1Wins = matches.filter(l => l.w === p1).length;
-    const p2Wins = matches.filter(l => l.w === p2).length;
-    const p1Rate = matches.length ? Math.round((p1Wins/matches.length)*100) : 50;
-
-    document.getElementById('modalBody').innerHTML = `
-        <div style="padding:40px 25px;">
-            <div style="text-align:center; margin-bottom:30px;">
-                <div style="font-size:11px; color:var(--blue); font-weight:900; letter-spacing:2px">HEAD TO HEAD</div>
-                <div style="font-size:24px; font-weight:900; margin-top:10px">${p1} <span style="color:var(--muted); font-size:14px">vs</span> ${p2}</div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; font-family:'Barlow Condensed'; font-weight:900; font-size:32px; margin-bottom:5px">
-                <div style="color:var(--blue)">${p1Wins}</div>
-                <div style="color:var(--red)">${p2Wins}</div>
-            </div>
-            <div class="h2h-bar">
-                <div class="h2h-win-fill" style="width:${p1Rate}%"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:30px">
-                <span>WINS BY ${p1.toUpperCase()}</span>
-                <span>WINS BY ${p2.toUpperCase()}</span>
-            </div>
-
-            <div style="font-size:11px; color:var(--muted); margin-bottom:15px">PAST ENCOUNTERS</div>
-            ${matches.reverse().map(m => `
-                <div class="history-card">
-                    <span>Winner: <b style="color:var(--blue)">${m.w}</b></span>
-                    <span style="font-weight:900; color:var(--blue)">+${m.diff} pts</span>
-                </div>
-            `).join('') || '<div style="font-size:12px; color:var(--muted)">No previous matches recorded.</div>'}
-            
-            <button onclick="closeModal()" style="width:100%; margin-top:30px; background:var(--line); color:#fff; border:none; padding:15px; border-radius:12px; font-weight:700">BACK TO TOURNAMENT</button>
-        </div>
-    `;
-}
-
-// --- SEEDED DRAW LOGIC ---
-function generateSeededDraw(evId) {
-    const e = events.find(x => x.id === evId);
-    let pList = Object.values(e.regs).map(name => players.find(p => p.name === name)).sort((a,b) => b.rating - a.rating);
-    
-    // 取最高分的两个作为种子
-    const s1 = pList.shift();
-    const s2 = pList.shift();
-    
-    // 随机打乱剩下的球员
-    pList.sort(() => Math.random() - 0.5);
-    
-    // 将 S1 放在顶部，S2 放在底部区域
-    const topHalf = [s1.name];
-    const bottomHalf = [s2.name];
-    
-    pList.forEach((p, i) => {
-        if(i % 2 === 0) topHalf.push(p.name);
-        else bottomHalf.push(p.name);
-    });
-
-    const fixtures = [];
-    const allNames = [...topHalf, ...bottomHalf];
-    for (let i = 0; i < allNames.length; i += 2) {
-        fixtures.push({ p1: allNames[i], p2: allNames[i+1] || "BYE" });
-    }
-
-    db.ref(`events/${evId}/fixtures`).set(fixtures).then(() => { toast("SEEDED DRAW CREATED"); showEventDetail(evId); });
-}
-
-// --- SYSTEM CORE (UNCHANGED) ---
-function registerEvent(evId) {
-    const n = document.getElementById('regSelect').value;
-    if(!n) return toast("Select a player");
-    const e = events.find(x => x.id === evId);
-    if(e.regs && Object.values(e.regs).includes(n)) return toast("Already in!");
-    db.ref(`events/${evId}/regs`).push(n).then(() => { toast("REGISTERED"); showEventDetail(evId); });
-}
-
+// --- 核心页面切换 ---
 function tab(id, el) {
     document.querySelectorAll('.page, .nav-tab').forEach(x => x.classList.remove('active'));
     document.getElementById('pg-'+id).classList.add('active'); el.classList.add('active');
     document.getElementById('filterArea').style.display = (id==='ranking'?'block':'none');
-    if(id==='coach' && !isCoach) { document.getElementById('adminAuth').style.display='flex'; pin=""; dots(); }
 }
 
-function pressKey(n) {
-    if(pin.length<4) { pin+=n; dots(); if(pin==="8888") { isCoach=true; document.getElementById('adminAuth').style.display='none'; document.getElementById('adminView').style.display='block'; } else if(pin.length===4) { toast("ERROR"); pin=""; dots(); } }
-}
-function dots() { document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled', i<pin.length)); }
-function cancelAdmin() { document.getElementById('adminAuth').style.display='none'; tab('ranking', document.querySelector('.nav-tab')); }
-function delPin() { pin=pin.slice(0,-1); dots(); }
-
-function createEvent() {
-    const n = document.getElementById('evName').value.trim();
-    const d = document.getElementById('evDate').value;
-    if(!n) return toast("Name required");
-    db.ref('events').push({ name:n, date:d }).then(() => { document.getElementById('evName').value = ""; toast("EVENT OPEN"); });
-}
-
-function saveMatch() {
-    const wn=document.getElementById('wSel').value, ln=document.getElementById('lSel').value;
-    if(!wn || !ln || wn===ln) return toast("SELECT WINNER & LOSER");
-    const w=players.find(p=>p.name===wn), l=players.find(p=>p.name===ln);
-    const diff = Math.round(32 * (1 - (1 / (1 + Math.pow(10, (l.rating-w.rating)/400)))));
-    db.ref('players/'+wn.replace(/\./g,'_')).update({rating:w.rating+diff});
-    db.ref('players/'+ln.replace(/\./g,'_')).update({rating:l.rating-diff});
-    db.ref('logs').push({w:wn, l:ln, diff, ts:Date.now()});
-    toast("SCORE SAVED");
-}
-
-function renderAdminList() {
-    document.getElementById('adminPlayerList').innerHTML = players.map(p => `
-        <div onclick="editPlayer('${p.name}')" style="display:flex; justify-content:space-between; padding:12px; background:#1a1f29; margin-bottom:8px; border-radius:10px; font-size:13px; border:1px solid var(--line);">
-            <span>${p.name}</span> <span style="color:var(--blue)">EDIT</span>
+// --- 赛事列表渲染 ---
+function renderEvents() {
+    document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
+        <div class="rank-card" onclick="openEventDashboard('${e.id}')">
+            <div style="width:100%">
+                <div style="color:var(--blue); font-size:10px; font-weight:800; letter-spacing:1px">${e.date || 'TBA'}</div>
+                <div style="font-weight:900; font-size:22px; text-transform:uppercase; margin-top:4px">${e.name}</div>
+                <div style="font-size:11px; color:var(--muted); margin-top:8px">Registered Athletes: ${e.regs ? Object.keys(e.regs).length : 0}</div>
+            </div>
+            <div style="color:var(--blue); font-weight:900">ENTER</div>
         </div>
     `).join('');
 }
 
-function editPlayer(name) {
-    const p = players.find(x => x.name === name);
+// --- 深层次 Event Dashboard ---
+function openEventDashboard(id) {
+    const e = events.find(x => x.id === id);
+    const regs = e.regs ? Object.values(e.regs) : [];
+    
     document.getElementById('modalBody').innerHTML = `
-        <div style="padding:25px;">
-            <div style="font-weight:900; margin-bottom:20px; color:var(--blue)">EDIT PLAYER</div>
-            <input type="text" id="editName" class="wtt-input" value="${p.name}">
-            <select id="editGender" class="wtt-select"><option value="Men" ${p.gender==='Men'?'selected':''}>Men</option><option value="Women" ${p.gender==='Women'?'selected':''}>Women</option></select>
-            <select id="editCat" class="wtt-select">${['Open','U19','U15','U12','U9'].map(c=>`<option value="${c}" ${(p.category||'Open')===c?'selected':''}>${c}</option>`).join('')}</select>
-            <input type="number" id="editRating" class="wtt-input" value="${Math.round(p.rating)}">
-            <button onclick="updatePlayer('${name.replace(/\./g,'_')}')" style="width:100%; background:var(--blue); border:none; padding:15px; border-radius:12px; font-weight:900;">UPDATE</button>
-            <button onclick="if(confirm('Delete?')) { db.ref('players/${name.replace(/\./g,'_')}').remove(); closeModal(); }" style="width:100%; background:none; color:var(--red); border:1px solid var(--red); padding:10px; margin-top:10px; border-radius:10px;">REMOVE</button>
+        <div style="padding:40px 25px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start">
+                <div>
+                    <div style="font-size:10px; color:var(--blue); font-weight:900; letter-spacing:2px">EVENT DASHBOARD</div>
+                    <div style="font-size:32px; font-family:'Barlow Condensed'; font-weight:900; text-transform:uppercase">${e.name}</div>
+                </div>
+                <button onclick="closeModal()" style="background:none; border:none; color:var(--muted); font-size:20px;">✕</button>
+            </div>
+
+            <div class="event-grid">
+                <div class="event-tool-card" onclick="showEntryList('${id}')">
+                    <span style="font-size:24px">👥</span>
+                    <div style="font-weight:900; margin-top:5px">ENTRY LIST</div>
+                    <div style="font-size:10px; color:var(--muted)">See who is playing</div>
+                </div>
+                <div class="event-tool-card" onclick="showMatchCenter('${id}')">
+                    <span style="font-size:24px">🏓</span>
+                    <div style="font-weight:900; margin-top:5px">MATCH CENTER</div>
+                    <div style="font-size:10px; color:var(--muted)">Draws & Results</div>
+                </div>
+            </div>
+
+            <div style="margin-top:30px; background:var(--line); padding:20px; border-radius:15px;">
+                <div style="font-size:11px; color:var(--muted); margin-bottom:15px; font-weight:700">QUICK REGISTRATION</div>
+                <select id="quickReg" class="wtt-select">
+                    <option value="">Select Athlete...</option>
+                    ${players.sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.name}">${p.name} (${p.category})</option>`).join('')}
+                </select>
+                <button onclick="registerEvent('${id}')" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900;">JOIN TOURNAMENT</button>
+            </div>
+
+            ${isCoach ? `<button onclick="deleteEvent('${id}')" style="width:100%; margin-top:20px; background:none; border:1px solid var(--red); color:var(--red); padding:12px; border-radius:10px; font-size:11px;">CANCEL EVENT (ADMIN)</button>` : ''}
         </div>
     `;
     document.getElementById('modalOverlay').classList.add('active');
 }
 
-function updatePlayer(oldKey) {
-    const newName = document.getElementById('editName').value.trim();
-    const data = { name: newName, gender: document.getElementById('editGender').value, category: document.getElementById('editCat').value, rating: parseFloat(document.getElementById('editRating').value) };
-    if(newName.replace(/\./g,'_') !== oldKey) db.ref('players/' + oldKey).remove();
-    db.ref('players/' + newName.replace(/\./g,'_')).update(data);
-    closeModal(); toast("PLAYER UPDATED");
+// --- 列表入口：查看谁参加了 ---
+function showEntryList(id) {
+    const e = events.find(x => x.id === id);
+    const regs = e.regs ? Object.values(e.regs) : [];
+    const grouped = { 'Open':[], 'U19':[], 'U15':[], 'U12':[], 'U9':[] };
+    
+    regs.forEach(name => {
+        const p = players.find(x => x.name === name);
+        if(p) grouped[p.category || 'Open'].push(p);
+    });
+
+    document.getElementById('modalBody').innerHTML = `
+        <div style="padding:40px 25px;">
+            <div onclick="openEventDashboard('${id}')" style="color:var(--blue); font-size:12px; font-weight:900; margin-bottom:20px; cursor:pointer">← BACK TO DASHBOARD</div>
+            <div style="font-size:28px; font-weight:900; margin-bottom:25px">ENTRY LIST</div>
+            
+            ${Object.entries(grouped).map(([cat, list]) => list.length > 0 ? `
+                <div style="margin-bottom:25px">
+                    <div style="font-size:11px; color:var(--blue); font-weight:900; margin-bottom:10px; border-bottom:1px solid var(--line); padding-bottom:5px">${cat} CATEGORY</div>
+                    ${list.sort((a,b)=>b.rating-a.rating).map((p, i) => `
+                        <div class="entry-item ${i<2?'seed':''}">
+                            <div style="font-weight:700">${p.name}</div>
+                            ${i<2 ? `<span style="font-size:8px; background:var(--blue); color:#000; padding:1px 4px; border-radius:3px; margin-left:8px">SEED ${i+1}</span>` : ''}
+                            <div style="margin-left:auto; font-family:'Barlow Condensed'; font-weight:900; color:var(--muted)">${Math.round(p.rating)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '').join('')}
+        </div>
+    `;
 }
 
-function setGender(v, el) { curG = v; document.querySelectorAll('#g-filters .chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderRanking(); }
-function setCat(v, el) { curC = v; document.querySelectorAll('#c-filters .chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderRanking(); }
-function updateSelects() {
-    const o = [...players].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
-    document.getElementById('wSel').innerHTML = '<option value="">Winner...</option>'+o;
-    document.getElementById('lSel').innerHTML = '<option value="">Loser...</option>'+o;
+// --- 对阵入口：看对阵表 ---
+function showMatchCenter(id) {
+    const e = events.find(x => x.id === id);
+    document.getElementById('modalBody').innerHTML = `
+        <div style="padding:40px 25px;">
+            <div onclick="openEventDashboard('${id}')" style="color:var(--blue); font-size:12px; font-weight:900; margin-bottom:20px; cursor:pointer">← BACK TO DASHBOARD</div>
+            <div style="font-size:28px; font-weight:900; margin-bottom:25px">MATCH CENTER</div>
+
+            <div id="fixtureList">
+                ${e.fixtures ? e.fixtures.map(f => `
+                    <div style="background:var(--card); padding:20px; border-radius:15px; margin-bottom:12px; border:1px solid var(--line); display:flex; align-items:center; justify-content:space-between">
+                        <div style="width:40%; text-align:right; font-weight:700; font-size:15px;">${f.p1}</div>
+                        <div style="background:var(--line); padding:5px 10px; border-radius:5px; font-size:10px; font-weight:900; color:var(--muted)">VS</div>
+                        <div style="width:40%; text-align:left; font-weight:700; font-size:15px;">${f.p2}</div>
+                    </div>
+                `).join('') : `
+                    <div style="text-align:center; padding:50px 20px;">
+                        <div style="font-size:40px; margin-bottom:15px">⏳</div>
+                        <div style="color:var(--muted)">Fixtures are not generated yet.</div>
+                        ${isCoach ? `<button onclick="generateFixtures('${id}')" style="margin-top:20px; background:var(--blue); color:#000; border:none; padding:12px 25px; border-radius:30px; font-weight:900;">GENERATE DRAW (ADMIN)</button>` : ''}
+                    </div>
+                `}
+            </div>
+        </div>
+    `;
 }
+
+// --- 逻辑功能 ---
+function registerEvent(evId) {
+    const name = document.getElementById('quickReg').value;
+    if(!name) return toast("Select a player!");
+    db.ref(`events/${evId}/regs`).push(name).then(() => { toast("REGISTRATION SUCCESS"); openEventDashboard(evId); });
+}
+
+function generateFixtures(evId) {
+    const e = events.find(x => x.id === evId);
+    let regs = Object.values(e.regs).sort(() => Math.random() - 0.5);
+    let fix = [];
+    for(let i=0; i<regs.length; i+=2) {
+        fix.push({ p1: regs[i], p2: regs[i+1] || "BYE (Walkover)" });
+    }
+    db.ref(`events/${evId}/fixtures`).set(fix).then(() => { showMatchCenter(evId); });
+}
+
+function renderRanking() {
+    let list = players.filter(p => (curG==='all' || (p.gender||'Men')===curG) && (curC==='all' || (p.category||'Open')===curC)).sort((a,b)=>b.rating-a.rating);
+    document.getElementById('rankList').innerHTML = list.map((p,i)=>`
+        <div class="rank-card" onclick="showPlayerProfile('${p.name}')">
+            <div style="width:30px; font-weight:900; font-style:italic; color:${i<3?'var(--blue)':'var(--muted)'}">${i+1}</div>
+            <div style="font-weight:700">${p.name}</div>
+            <div class="r-pts">${Math.round(p.rating)}</div>
+        </div>
+    `).join('');
+}
+
+function showPlayerProfile(name) {
+    const p = players.find(x => x.name === name);
+    document.getElementById('modalBody').innerHTML = `<div style="padding:40px; text-align:center;"><h2>${name}</h2><p>${p.category}</p><button onclick="closeModal()">CLOSE</button></div>`;
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+function pressKey(n) {
+    pin += n; 
+    if(pin === "8888") { isCoach = true; document.getElementById('adminAuth').style.display='none'; document.getElementById('adminView').style.display='block'; }
+    if(pin.length >= 4 && pin !== "8888") pin = "";
+}
+
+function createEvent() {
+    const name = document.getElementById('evName').value;
+    const date = document.getElementById('evDate').value;
+    if(!name) return toast("Name required");
+    db.ref('events').push({ name, date }).then(() => { toast("EVENT CREATED"); document.getElementById('evName').value=""; });
+}
+
+function deleteEvent(id) {
+    if(confirm("Delete this event?")) db.ref('events/'+id).remove().then(() => closeModal());
+}
+
+function renderAdminList() {
+    document.getElementById('adminPlayerList').innerHTML = players.map(p => `
+        <div style="padding:10px; background:var(--line); margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between">
+            <span>${p.name}</span> <span style="color:var(--blue)">${Math.round(p.rating)}</span>
+        </div>
+    `).join('');
+}
+
+function setGender(v, el) { curG = v; document.querySelectorAll('.filter-row:first-child .chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderRanking(); }
+function setCat(v, el) { curC = v; document.querySelectorAll('.filter-row:last-child .chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderRanking(); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
 function toast(m) { const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
 
