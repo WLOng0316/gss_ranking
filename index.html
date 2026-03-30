@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GSS RANKING PRO</title>
+    <title>GSS RANKING ADVANCED</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        :root { --blue: #00d4ff; --red: #ff3b3b; --bg: #030508; --card: #12161f; --line: #1c2230; --text: #e8edf5; --muted: #4e5b73; --gold: #fbc531; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; overflow-x: hidden; }
+        :root { --blue: #00d4ff; --red: #ff3b3b; --bg: #030508; --card: #12161f; --line: #1c2230; --text: #e8edf5; --muted: #4e5b73; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; }
         
-        header { padding: 60px 20px 15px; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); }
+        header { padding: 60px 20px 15px; background: rgba(0,0,0,0.9); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); }
         .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; font-style: italic; letter-spacing: -1px; }
         
         nav { position: fixed; bottom: 0; width: 100%; background: rgba(3,5,8,0.95); display: flex; border-top: 1px solid var(--line); padding: 15px 0 35px; z-index: 100; backdrop-filter: blur(15px); }
@@ -28,42 +28,36 @@
         .sec-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; padding: 20px; display: flex; align-items: center; gap: 10px; }
         .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--line); }
         
-        /* RANKING & BADGES */
-        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 0 20px 10px; display: flex; align-items: center; cursor: pointer; position: relative; }
-        .badge { font-size: 12px; margin-left: 5px; }
+        /* RANKING & POPUP */
+        .rank-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 0 20px 10px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
+        .rank-card:active { transform: scale(0.97); }
         .r-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: var(--blue); margin-left: auto; }
 
-        /* MODAL BOTTOM SHEET */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 500; display: none; align-items: flex-end; }
-        .modal-content { width: 100%; background: #0a0e14; border-top: 3px solid var(--blue); border-radius: 25px 25px 0 0; max-height: 90vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); padding-bottom: 40px; }
+        .modal-content { width: 100%; background: #0a0e14; border-top: 3px solid var(--blue); border-radius: 25px 25px 0 0; max-height: 90vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); padding-bottom: 50px; }
         .modal-overlay.active { display: flex; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
-        
-        /* STATS GRID */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 20px 20px; }
-        .stat-box { background: var(--line); padding: 15px 10px; border-radius: 12px; text-align: center; }
-        .stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; color: var(--blue); }
-        .stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
 
-        .history-card { background: #161b26; border-radius: 12px; padding: 15px; margin: 0 20px 8px; display: flex; justify-content: space-between; align-items: center; }
-        .trend-up { color: #00ff88; } .trend-down { color: var(--red); }
+        /* GROUPING STYLE */
+        .group-box { background: var(--card); margin: 0 20px 15px; border-radius: 12px; border: 1px solid var(--line); overflow: hidden; }
+        .group-header { background: var(--line); padding: 10px 15px; font-weight: 900; color: var(--blue); font-size: 14px; display: flex; justify-content: space-between; }
+        .match-row { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; display: flex; justify-content: space-between; }
 
-        /* ADMIN LOCK */
+        /* PIN LOCK */
         #adminAuthLayer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 600; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .key { width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; background: rgba(255,255,255,0.03); margin: 10px; }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; }
+        .key { width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; background: rgba(255,255,255,0.03); }
         .dot { width: 12px; height: 12px; border: 2px solid var(--muted); border-radius: 50%; margin: 0 8px; }
         .dot.filled { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 10px var(--blue); }
 
         .wtt-input, .wtt-select { width: 100%; background: var(--card); border: 1px solid var(--line); color: #fff; padding: 14px; border-radius: 8px; margin-bottom: 10px; font-size: 15px; }
-        .h2h-box { background: rgba(0, 212, 255, 0.1); border: 1px dashed var(--blue); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 12px; text-align: center; color: var(--blue); font-family: 'Share Tech Mono'; }
-        
-        .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: 900; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 1000; pointer-events: none; }
+        .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: 900; font-size: 12px; opacity: 0; transition: 0.3s; z-index: 1000; }
         .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
 
-<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">PRO VERSION 12.0</div></header>
+<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">v13.0 ADVANCED</div></header>
 
 <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
@@ -73,39 +67,34 @@
 </div>
 
 <div id="adminAuthLayer">
-    <div style="color:var(--muted); font-weight:700; letter-spacing:2px; margin-bottom:30px;">ENTER COACH PIN</div>
-    <div style="display:flex; margin-bottom:40px;"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-    <div style="display:grid; grid-template-columns: repeat(3, 1fr);">
+    <div style="color:var(--muted); font-weight:700; letter-spacing:2px; margin-bottom:20px;">ENTER COACH PIN</div>
+    <div style="display:flex;"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="keypad">
         <script>for(let i=1;i<=9;i++) document.write(`<div class="key" onclick="pressKey('${i}')">${i}</div>`);</script>
         <div class="key" style="border:none; color:var(--red); font-size:14px" onclick="clearPin()">ESC</div>
-        <div class="key" onclick="pressKey('0')">0</div>
+        <div class="key" onclick="pressKey('0')">${0}</div>
         <div class="key" style="border:none; color:var(--blue); font-size:14px" onclick="delPin()">DEL</div>
     </div>
 </div>
 
-<div id="pg-ranking" class="page active"><div class="sec-title">Standard World Ranking</div><div id="rankList"></div></div>
-<div id="pg-events" class="page"><div class="sec-title">Tournament Calendar</div><div id="eventList"></div></div>
+<div id="pg-ranking" class="page active"><div class="sec-title">Elite Ranking Standings</div><div id="rankList"></div></div>
+<div id="pg-events" class="page"><div class="sec-title">Tournament & Grouping</div><div id="eventList"></div></div>
 
 <div id="pg-coach" class="page">
-    <div id="adminMain" style="display:none; padding:0 20px;">
-        <div class="sec-title" style="padding:20px 0">Match Entry</div>
-        <div id="h2hDisplay" class="h2h-box" style="display:none">Select players to see H2H</div>
-        <select id="wSel" class="wtt-select" onchange="checkH2H()"></select>
-        <select id="lSel" class="wtt-select" onchange="checkH2H()"></select>
+    <div id="adminMain" style="display:none; padding: 0 20px;">
+        <div class="sec-title" style="padding:10px 0">Fast Score Entry</div>
+        <select id="wSel" class="wtt-select"></select>
+        <select id="lSel" class="wtt-select"></select>
         <div id="scoreInputs">
-            <script>for(let i=1;i<=5;i++) document.write(`<div style="display:grid; grid-template-columns:50px 1fr 1fr; gap:10px; margin-bottom:8px;"><div style="font-size:10px; color:var(--muted)">SET ${i}</div><input type="number" id="s${i}w" class="wtt-input" placeholder="W" style="margin:0"><input type="number" id="s${i}l" class="wtt-input" placeholder="L" style="margin:0"></div>`);</script>
+            <script>for(let i=1;i<=5;i++) document.write(`<div style="display:grid; grid-template-columns: 50px 1fr 1fr; gap:10px; margin-bottom:8px;"><div style="font-size:10px; color:var(--muted)">SET ${i}</div><input type="number" id="s${i}w" class="wtt-input" placeholder="W" style="margin:0"><input type="number" id="s${i}l" class="wtt-input" placeholder="L" style="margin:0"></div>`);</script>
         </div>
-        <button onclick="submitMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:16px; border-radius:10px; font-weight:900; margin-bottom:30px;">SUBMIT RESULT</button>
+        <button onclick="submitMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:16px; border-radius:8px; font-weight:900;">SAVE RESULT</button>
 
-        <div class="sec-title" style="padding:20px 0">Manage Athletes</div>
-        <input type="text" id="newName" class="wtt-input" placeholder="Player Name">
+        <div class="sec-title" style="padding:20px 0">Database Management</div>
+        <input type="text" id="newName" class="wtt-input" placeholder="Athlete Name">
         <select id="newGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
-        <button onclick="addPlayer()" style="width:100%; background:var(--blue); padding:14px; border:none; border-radius:10px; font-weight:900; margin-bottom:30px;">REGISTER PLAYER</button>
-
-        <div class="sec-title" style="padding:20px 0">Manage Events</div>
-        <input type="text" id="evName" class="wtt-input" placeholder="Tournament Name">
-        <input type="text" id="evDate" class="wtt-input" placeholder="Date (e.g. 24 APR)">
-        <button onclick="addEvent()" style="width:100%; background:var(--text); color:#000; padding:14px; border:none; border-radius:10px; font-weight:900;">POST TOURNAMENT</button>
+        <button onclick="addPlayer()" style="width:100%; background:var(--blue); padding:14px; border:none; border-radius:8px; font-weight:900;">ADD ATHLETE</button>
+        
         <div id="adminPlayerList" style="margin-top:20px"></div>
     </div>
 </div>
@@ -118,6 +107,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// --- CONFIG & DB ---
 const firebaseConfig = {
     apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
     authDomain: "gss-ranking.firebaseapp.com",
@@ -138,139 +128,149 @@ function init() {
     db.ref('events').on('value', s => { events = s.val() ? Object.entries(s.val()).map(([id, d]) => ({id, ...d})) : []; renderEvents(); });
 }
 
-// --- CORE UTILS ---
+// --- ELO LOGIC 进阶 (K-FACTOR) ---
+function getKFactor(pName) {
+    const pMatches = logs.filter(l => l.w === pName || l.l === pName).length;
+    if(pMatches < 5) return 64; // 新手快速定级
+    if(pMatches > 25) return 16; // 老手分数稳定
+    return 32; // 标准
+}
+
+// --- GROUPING LOGIC (蛇形排列) ---
+function generateAutoGroups(participants) {
+    const sorted = [...participants].sort((a,b) => {
+        const rA = players.find(x => x.name === a.name)?.rating || 0;
+        const rB = players.find(x => x.name === b.name)?.rating || 0;
+        return rB - rA;
+    });
+    
+    let groups = [[], []]; // 默认分 A, B 两组
+    sorted.forEach((p, i) => {
+        // 蛇形填充：0,1,1,0,0,1...
+        const gIdx = (Math.floor(i / 1) % 4 === 0 || Math.floor(i / 1) % 4 === 3) ? 0 : 1;
+        groups[i % 2].push(p.name);
+    });
+    return groups;
+}
+
+// --- UI HANDLERS ---
 function tab(id, el) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
     document.getElementById('pg-' + id).classList.add('active');
     el.classList.add('active');
-    if(id === 'coach' && !isAdmin) { document.getElementById('adminAuthLayer').style.display = 'flex'; pinInput = ""; updatePinDots(); }
+    if(id === 'coach' && !isAdmin) { document.getElementById('adminAuthLayer').style.display = 'flex'; pinInput = ""; updateDots(); }
 }
 
 function pressKey(n) {
     if(pinInput.length < 4) {
-        pinInput += n; updatePinDots();
-        if(pinInput.length === 4 && pinInput === "8888") {
+        pinInput += n; updateDots();
+        if(pinInput === "8888") {
             isAdmin = true; document.getElementById('adminAuthLayer').style.display = 'none';
             document.getElementById('adminMain').style.display = 'block';
-            document.getElementById('statusLabel').textContent = "COACH AUTHORIZED";
+            document.getElementById('statusLabel').textContent = "COACH MODE";
             document.getElementById('statusLabel').style.color = "var(--blue)";
-        } else if(pinInput.length === 4) { toast("INVALID PIN"); pinInput = ""; updatePinDots(); }
+        } else if(pinInput.length === 4) { toast("WRONG PIN"); pinInput = ""; updateDots(); }
     }
 }
-function updatePinDots() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('filled', i < pinInput.length)); }
+function updateDots() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('filled', i < pinInput.length)); }
 function clearPin() { document.getElementById('adminAuthLayer').style.display = 'none'; tab('ranking', document.querySelector('.nav-tab')); }
-function delPin() { pinInput = pinInput.slice(0,-1); updatePinDots(); }
+function delPin() { pinInput = pinInput.slice(0,-1); updateDots(); }
 
-// --- H2H LOGIC ---
-function checkH2H() {
-    const w = document.getElementById('wSel').value, l = document.getElementById('lSel').value;
-    const h2hBox = document.getElementById('h2hDisplay');
-    if(w && l && w !== l) {
-        const matches = logs.filter(m => (m.w === w && m.l === l) || (m.w === l && m.l === w));
-        const wWins = matches.filter(m => m.w === w).length;
-        const lWins = matches.filter(m => m.w === l).length;
-        h2hBox.style.display = 'block';
-        h2hBox.textContent = `H2H RECORD: ${w} ${wWins} - ${lWins} ${l}`;
-    } else { h2hBox.style.display = 'none'; }
-}
-
-// --- PLAYER DETAILS + STATS + TREND ---
+// --- PLAYER DETAILS ---
 function openPlayerDetail(name) {
     const p = players.find(x => x.name === name);
     const pLogs = logs.filter(l => l.w === name || l.l === name).reverse();
-    const wins = pLogs.filter(l => l.w === name).length;
-    const losses = pLogs.filter(l => l.l === name).length;
-    const winRate = pLogs.length ? Math.round((wins / pLogs.length) * 100) : 0;
-    
-    let currentStreak = 0;
-    for(let log of pLogs) { if(log.w === name) currentStreak++; else break; }
+    const avgOpponent = pLogs.length ? Math.round(pLogs.reduce((acc, curr) => {
+        const opp = curr.w === name ? curr.l : curr.w;
+        return acc + (players.find(x => x.name === opp)?.rating || 1000);
+    }, 0) / pLogs.length) : 1000;
 
     let html = `
-        <div style="padding: 25px; display: flex; align-items: center; gap: 20px;">
-            <div style="width:70px; height:70px; background:var(--line); border-radius:50%; border:3px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:900; color:var(--blue)">${name[0]}</div>
-            <div>
-                <div style="font-size:26px; font-weight:900;">${name} ${currentStreak >= 3 ? '🔥' : ''}</div>
-                <div style="font-size:12px; color:var(--muted)">RANKING POINTS: ${Math.round(p.rating)}</div>
+        <div style="padding: 30px 20px;">
+            <div style="font-size:28px; font-weight:900; margin-bottom:5px;">${name}</div>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <span style="background:var(--blue); color:#000; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:900;">${p.group}</span>
+                <span style="color:var(--muted); font-size:11px;">AVG OPPONENT: ${avgOpponent}</span>
             </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+                <div style="background:var(--line); padding:15px; border-radius:10px; text-align:center;">
+                    <div style="font-size:24px; font-weight:900; color:var(--blue)">${Math.round(p.rating)}</div>
+                    <div style="font-size:9px; color:var(--muted)">ELO RATING</div>
+                </div>
+                <div style="background:var(--line); padding:15px; border-radius:10px; text-align:center;">
+                    <div style="font-size:24px; font-weight:900;">${pLogs.filter(l => l.w === name).length}W - ${pLogs.filter(l => l.l === name).length}L</div>
+                    <div style="font-size:9px; color:var(--muted)">RECORD</div>
+                </div>
+            </div>
+            <div class="sec-title">Match History</div>
+            ${pLogs.slice(0,10).map(m => `
+                <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.03); margin-bottom:8px; border-radius:8px; border-left:3px solid ${m.w === name ? 'var(--blue)' : 'var(--red)'}">
+                    <div><div style="font-weight:700">vs ${m.w === name ? m.l : m.w}</div><div style="font-size:10px; color:var(--muted)">${m.score}</div></div>
+                    <div style="text-align:right; font-weight:900; color:${m.w === name ? 'var(--blue)' : 'var(--red)'}">${m.w === name ? '+' : '-'}${m.diff}</div>
+                </div>
+            `).join('')}
         </div>
-        <div class="stats-grid">
-            <div class="stat-box"><div class="stat-val">${pLogs.length}</div><div class="stat-lbl">Played</div></div>
-            <div class="stat-box"><div class="stat-val" style="color:#00ff88">${winRate}%</div><div class="stat-lbl">Win Rate</div></div>
-            <div class="stat-box"><div class="stat-val">${currentStreak}</div><div class="stat-lbl">Streak</div></div>
-        </div>
-        <div class="sec-title">Match Analysis</div>
     `;
-    
-    html += pLogs.slice(0, 10).map(m => {
-        const isWin = m.w === name;
-        return `
-            <div class="history-card">
-                <div>
-                    <div style="font-size:14px; font-weight:700;">${isWin ? 'W' : 'L'} vs ${isWin?m.l:m.w}</div>
-                    <div style="font-size:10px; color:var(--muted); font-family:'Share Tech Mono'">${m.score}</div>
-                </div>
-                <div class="${isWin?'trend-up':'trend-down'}" style="font-family:'Barlow Condensed'; font-weight:900; font-size:18px;">
-                    ${isWin?'+':'-'}${m.diff} <span style="font-size:10px">${isWin?'▲':'▼'}</span>
-                </div>
-            </div>`;
-    }).join('') || '<div style="text-align:center; color:var(--muted); padding:20px;">No matches recorded</div>';
-    
     document.getElementById('modalBody').innerHTML = html;
     document.getElementById('modalOverlay').classList.add('active');
 }
 
-// --- EVENT & SEEDING ---
+// --- EVENT & AUTO GROUPING ---
 function openEventDetail(id) {
     const ev = events.find(x => x.id === id);
-    let participants = ev.participants ? Object.values(ev.participants) : [];
-    // 核心功能：自动按种子分数排序 (Seeding)
-    participants.sort((a,b) => {
-        const pA = players.find(p => p.name === a.name);
-        const pB = players.find(p => p.name === b.name);
-        return (pB?pB.rating:0) - (pA?pA.rating:0);
-    });
-
+    const participants = ev.participants ? Object.values(ev.participants) : [];
+    
     let html = `
-        <div style="padding:25px;">
-            <div style="color:var(--blue); font-family:'Share Tech Mono'; font-size:11px;">${ev.date}</div>
-            <div style="font-size:28px; font-weight:900; margin-bottom:20px;">${ev.name}</div>
-            <select id="regPlayer" class="wtt-select">${players.map(p => `<option value="${p.name}">${p.name}</option>`).join('')}</select>
-            <select id="regGroup" class="wtt-select"><option value="Open">Open</option><option value="U18">U18</option><option value="U15">U15</option><option value="U12">U12</option></select>
-            <button onclick="registerEvent('${id}')" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900;">ENTRY REGISTRATION</button>
-        </div>
-        <div class="sec-title">Seeding List (${participants.length})</div>
+        <div style="padding:30px 20px;">
+            <div style="font-size:11px; color:var(--blue); font-family:'Share Tech Mono'">${ev.date}</div>
+            <div style="font-size:26px; font-weight:900; margin-bottom:20px;">${ev.name}</div>
+            <button onclick="registerEvent('${id}')" style="width:100%; background:var(--blue); color:#000; padding:15px; border:none; border-radius:8px; font-weight:900; margin-bottom:10px;">JOIN TOURNAMENT</button>
+            
+            <div class="sec-title">Seeded Groups (Auto-Generated)</div>
     `;
 
-    participants.forEach((p, index) => {
-        const pData = players.find(x => x.name === p.name);
-        html += `<div style="margin:0 20px 8px; background:var(--card); padding:12px; border-radius:8px; display:flex; align-items:center;">
-            <div style="width:25px; color:var(--muted); font-size:10px;">#${index+1}</div>
-            <div style="flex:1"><b>${p.name}</b> <span style="font-size:10px; color:var(--muted)">[${p.group}]</span></div>
-            <div style="color:var(--blue); font-weight:700; font-size:14px;">${pData ? Math.round(pData.rating) : ''}</div>
-        </div>`;
-    });
+    if(participants.length >= 4) {
+        const groups = generateAutoGroups(participants);
+        groups.forEach((g, i) => {
+            html += `
+                <div class="group-box">
+                    <div class="group-header">GROUP ${String.fromCharCode(65+i)} <span>${g.length} PLAYERS</span></div>
+                    ${g.map(pName => `<div class="match-row"><b>${pName}</b> <span>${Math.round(players.find(x => x.name === pName)?.rating || 1000)} pts</span></div>`).join('')}
+                    <div style="padding:10px; font-size:10px; color:var(--muted); background:rgba(0,0,0,0.2)">SUGGESTED: 1 vs 4, 2 vs 3</div>
+                </div>`;
+        });
+    } else {
+        html += `<div style="text-align:center; padding:20px; color:var(--muted)">Need at least 4 players for grouping</div>`;
+    }
 
     document.getElementById('modalBody').innerHTML = html;
     document.getElementById('modalOverlay').classList.add('active');
 }
 
-// --- DATABASE ACTIONS ---
+// --- ACTIONS ---
 function submitMatch() {
     const wn = document.getElementById('wSel').value, ln = document.getElementById('lSel').value;
-    if(!wn || !ln || wn === ln) return toast("INVALID SELECTION");
+    if(!wn || !ln || wn === ln) return toast("Invalid Players");
+    
     let sc = []; for(let i=1;i<=5;i++){ let w=document.getElementById(`s${i}w`).value, l=document.getElementById(`s${i}l`).value; if(w!=""&&l!="") sc.push(`${w}-${l}`); }
+    
     const w = players.find(p => p.name === wn), l = players.find(p => p.name === ln);
-    const diff = Math.round(32 * (1 - (1 / (1 + Math.pow(10, (l.rating - w.rating) / 400)))));
+    const kw = getKFactor(wn), kl = getKFactor(ln);
+    
+    const expected = 1 / (1 + Math.pow(10, (l.rating - w.rating) / 400));
+    const diff = Math.round(kw * (1 - expected));
+
     db.ref('players/' + wn.replace(/\./g, '_')).update({ rating: w.rating + diff });
     db.ref('players/' + ln.replace(/\./g, '_')).update({ rating: l.rating - diff });
     db.ref('logs').push({ w: wn, l: ln, diff, score: sc.join(', '), ts: Date.now() });
-    toast("SCORE RECORDED");
+    toast("SCORE SAVED & ELO UPDATED");
 }
 
 function registerEvent(id) {
-    const name = document.getElementById('regPlayer').value, group = document.getElementById('regGroup').value;
-    db.ref(`events/${id}/participants`).push({ name, group });
+    const userP = prompt("Enter Player Name:");
+    if(!userP || !players.find(x => x.name === userP)) return toast("Player not found");
+    db.ref(`events/${id}/participants`).push({ name: userP, group: players.find(x => x.name === userP).group });
     toast("REGISTERED"); setTimeout(() => openEventDetail(id), 500);
 }
 
@@ -278,33 +278,17 @@ function addPlayer() {
     const n = document.getElementById('newName').value.trim();
     if(!n) return;
     db.ref('players/' + n.replace(/\./g, '_')).set({ name: n, group: document.getElementById('newGroup').value, rating: 1000 });
-    document.getElementById('newName').value = ""; toast("PLAYER ADDED");
+    document.getElementById('newName').value = ""; toast("ATHLETE CREATED");
 }
 
-function addEvent() {
-    const n = document.getElementById('evName').value, d = document.getElementById('evDate').value;
-    if(!n || !d) return;
-    db.ref('events').push({ name: n, date: d });
-    toast("TOURNAMENT CREATED");
-}
-
-// --- RENDERS ---
 function renderRanking() {
     const sorted = [...players].sort((a,b) => b.rating - a.rating);
-    document.getElementById('rankList').innerHTML = sorted.map((p, i) => {
-        let badges = '';
-        if(i < 3) badges += `<span class="badge">🎖️</span>`;
-        // 检测该球员是否正在连胜
-        const pLogs = logs.filter(l => l.w === p.name || l.l === p.name).reverse();
-        let streak = 0; for(let l of pLogs){ if(l.w === p.name) streak++; else break; }
-        if(streak >= 3) badges += `<span class="badge">🔥</span>`;
-
-        return `<div class="rank-card" onclick="openPlayerDetail('${p.name}')">
+    document.getElementById('rankList').innerHTML = sorted.map((p, i) => `
+        <div class="rank-card" onclick="openPlayerDetail('${p.name}')">
             <div style="width:25px; color:var(--muted); font-weight:900;">${i+1}</div>
-            <div><div style="font-weight:700;">${p.name}${badges}</div><div style="font-size:10px; color:var(--muted)">${p.group} GROUP</div></div>
+            <div><div style="font-weight:700;">${p.name}</div><div style="font-size:10px; color:var(--muted)">${p.group}</div></div>
             <div class="r-pts">${Math.round(p.rating)}</div>
-        </div>`;
-    }).join('');
+        </div>`).join('');
 }
 
 function renderEvents() {
@@ -312,14 +296,14 @@ function renderEvents() {
         <div class="rank-card" onclick="openEventDetail('${e.id}')">
             <div><div style="color:var(--blue); font-size:10px; font-family:'Share Tech Mono'">${e.date}</div><div style="font-weight:900; font-size:18px">${e.name}</div></div>
             <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
-                ${isAdmin ? `<span style="color:var(--red); font-size:12px;" onclick="event.stopPropagation(); if(confirm('Delete?')) db.ref('events/${e.id}').remove();">DEL</span>` : ''}
+                ${isAdmin ? `<span style="color:var(--red); font-size:12px;" onclick="event.stopPropagation(); if(confirm('Del?')) db.ref('events/${e.id}').remove();">DEL</span>` : ''}
                 <span style="color:var(--muted)">→</span>
             </div>
         </div>`).join('');
 }
 
 function renderAdminList() {
-    document.getElementById('adminPlayerList').innerHTML = players.map(p => `<div style="display:flex; justify-content:space-between; padding:12px; background:var(--card); margin-bottom:5px; border-radius:8px; font-size:14px;"><span>${p.name}</span><span style="color:var(--red)" onclick="if(confirm('Delete?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">REMOVE</span></div>`).join('');
+    document.getElementById('adminPlayerList').innerHTML = players.map(p => `<div style="display:flex; justify-content:space-between; padding:10px; background:var(--card); margin-bottom:5px; border-radius:8px; font-size:13px;"><span>${p.name}</span><span style="color:var(--red)" onclick="if(confirm('Del?')) db.ref('players/${p.name.replace(/\./g,'_')}').remove()">REMOVE</span></div>`).join('');
 }
 
 function updateSelects() {
