@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GSS RANKING - PROFESSIONAL</title>
+    <title>GSS RANKING - PRO FIX</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -51,7 +51,7 @@
 </head>
 <body>
 
-<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">v15.0 FIX</div></header>
+<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">v15.1 FULL FIX</div></header>
 
 <div id="filterArea" class="filter-section">
     <div class="filter-row" id="genderFilters">
@@ -89,6 +89,11 @@
         <select id="wSel" class="wtt-select"></select>
         <select id="lSel" class="wtt-select"></select>
         <button onclick="saveMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900; margin-bottom:30px;">SAVE SCORE</button>
+
+        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">CREATE EVENT</div>
+        <input type="text" id="evName" class="wtt-input" placeholder="Event Name">
+        <input type="date" id="evDate" class="wtt-input">
+        <button onclick="createEvent()" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900; margin-bottom:30px;">ADD EVENT</button>
 
         <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">NEW ATHLETE</div>
         <input type="text" id="newName" class="wtt-input" placeholder="Full Name">
@@ -129,8 +134,15 @@ function init() {
         players = s.val() ? Object.values(s.val()) : []; 
         renderRanking(); updateSelects(); renderAdminList(); 
     });
-    db.ref('logs').on('value', s => { logs = s.val() ? Object.values(s.val()) : []; });
-    db.ref('events').on('value', s => { events = s.val() ? Object.entries(s.val()).map(([id, d]) => ({id, ...d})) : []; renderEvents(); });
+    db.ref('logs').on('value', s => { 
+        const val = s.val();
+        logs = val ? Object.values(val) : []; 
+    });
+    db.ref('events').on('value', s => { 
+        const val = s.val();
+        events = val ? Object.entries(val).map(([id, d]) => ({id, ...d})) : []; 
+        renderEvents(); 
+    });
 }
 
 // --- FILTER ---
@@ -145,7 +157,33 @@ function renderRanking() {
             <div><div style="font-weight:700">${p.name}</div><div style="font-size:10px; color:var(--muted)">${p.gender||'Men'} | ${p.category||'Open'}</div></div>
             <div class="r-pts">${Math.round(p.rating)}</div>
         </div>
+    `).join('') || '<div style="text-align:center; padding:50px; color:var(--muted)">No players.</div>';
+}
+
+function renderEvents() {
+    // 修复点：即使数据不完整也确保能渲染，防止页面空白
+    const listHtml = events.slice().reverse().map(e => `
+        <div class="rank-card">
+            <div>
+                <div style="color:var(--blue); font-size:10px; font-family:'Share Tech Mono'">${e.date || 'TBA'}</div>
+                <div style="font-weight:900; font-size:18px">${e.name || 'Unnamed Event'}</div>
+            </div>
+            <div style="margin-left:auto; display:flex; gap:10px;">
+                ${isCoach ? `<span style="color:var(--red); font-size:12px" onclick="if(confirm('Delete?')) db.ref('events/${e.id}').remove()">DEL</span>` : ''}
+                <span style="color:var(--muted)">→</span>
+            </div>
+        </div>
     `).join('');
+    document.getElementById('eventList').innerHTML = listHtml || '<div style="text-align:center; padding:50px; color:var(--muted)">No Events.</div>';
+}
+
+// --- ADMIN CREATE EVENT ---
+function createEvent() {
+    const n = document.getElementById('evName').value.trim();
+    const d = document.getElementById('evDate').value;
+    if(!n) return;
+    db.ref('events').push({ name: n, date: d });
+    document.getElementById('evName').value = ""; toast("EVENT ADDED");
 }
 
 // --- ADMIN EDIT PLAYER ---
@@ -154,17 +192,21 @@ function editPlayer(name) {
     let html = `
         <div style="padding:25px;">
             <div style="font-weight:900; margin-bottom:15px; color:var(--blue)">EDIT PLAYER: ${name}</div>
+            <div style="font-size:10px; color:var(--muted)">NAME</div>
             <input type="text" id="editName" class="wtt-input" value="${p.name}">
+            <div style="font-size:10px; color:var(--muted)">GENDER</div>
             <select id="editGender" class="wtt-select">
                 <option value="Men" ${p.gender==='Men'?'selected':''}>Men</option>
                 <option value="Women" ${p.gender==='Women'?'selected':''}>Women</option>
             </select>
+            <div style="font-size:10px; color:var(--muted)">CATEGORY</div>
             <select id="editCat" class="wtt-select">
                 ${['Open','U19','U15','U12','U9'].map(c=>`<option value="${c}" ${p.category===c?'selected':''}>${c}</option>`).join('')}
             </select>
+            <div style="font-size:10px; color:var(--muted)">RATING (ELO)</div>
             <input type="number" id="editRating" class="wtt-input" value="${Math.round(p.rating)}">
             <button onclick="updatePlayer('${name.replace(/\./g,'_')}')" style="width:100%; background:var(--blue); border:none; padding:15px; border-radius:10px; font-weight:900;">UPDATE PROFILE</button>
-            <button onclick="if(confirm('Delete?')) { db.ref('players/${name.replace(/\./g,'_')}').remove(); closeModal(); }" style="width:100%; background:none; border:1px solid var(--red); color:var(--red); padding:12px; border-radius:10px; margin-top:10px; font-weight:700;">DELETE PLAYER</button>
+            <button onclick="if(confirm('Delete Player?')) { db.ref('players/${name.replace(/\./g,'_')}').remove(); closeModal(); }" style="width:100%; background:none; border:1px solid var(--red); color:var(--red); padding:12px; border-radius:10px; margin-top:10px; font-weight:700;">DELETE PLAYER</button>
         </div>
     `;
     document.getElementById('modalBody').innerHTML = html;
@@ -179,10 +221,7 @@ function updatePlayer(oldKey) {
         category: document.getElementById('editCat').value,
         rating: parseFloat(document.getElementById('editRating').value)
     };
-    // 如果名字改了，需要删掉旧的加新的，否则直接更新
-    if(newName.replace(/\./g,'_') !== oldKey) {
-        db.ref('players/' + oldKey).remove();
-    }
+    if(newName.replace(/\./g,'_') !== oldKey) { db.ref('players/' + oldKey).remove(); }
     db.ref('players/' + newName.replace(/\./g,'_')).update(data);
     closeModal(); toast("PLAYER UPDATED");
 }
@@ -196,7 +235,7 @@ function tab(id, el) {
 }
 
 function pressKey(n) {
-    if(pin.length<4) { pin+=n; dots(); if(pin==="8888") { isCoach=true; document.getElementById('adminAuth').style.display='none'; document.getElementById('adminView').style.display='block'; } else if(pin.length===4) { toast("WRONG"); pin=""; dots(); } }
+    if(pin.length<4) { pin+=n; dots(); if(pin==="8888") { isCoach=true; document.getElementById('adminAuth').style.display='none'; document.getElementById('adminView').style.display='block'; renderEvents(); } else if(pin.length===4) { toast("WRONG"); pin=""; dots(); } }
 }
 function dots() { document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled', i<pin.length)); }
 function cancelAdmin() { document.getElementById('adminAuth').style.display='none'; tab('ranking', document.querySelector('.nav-tab')); }
@@ -234,21 +273,23 @@ function showDetail(name) {
     const pLogs = logs.filter(l => l.w === name || l.l === name).reverse().slice(0,8);
     document.getElementById('modalBody').innerHTML = `<div style="padding:30px">
         <div style="font-size:28px; font-weight:900">${name}</div>
-        <div style="color:var(--blue); font-size:12px; margin-bottom:20px">${p.gender} | ${p.category}</div>
+        <div style="color:var(--blue); font-size:12px; margin-bottom:20px">${p.gender||'Men'} | ${p.category||'Open'}</div>
         <div style="background:var(--line); padding:20px; border-radius:15px; text-align:center; margin-bottom:20px">
             <div style="font-size:32px; font-weight:900; color:var(--blue)">${Math.round(p.rating)}</div>
             <div style="font-size:10px; color:var(--muted)">CURRENT ELO</div>
         </div>
-        ${pLogs.map(m=>`<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid var(--line)">
+        <div style="font-size:10px; color:var(--muted); margin-bottom:10px">RECENT MATCHES</div>
+        ${pLogs.map(m=>`<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05)">
             <span>vs ${m.w===name?m.l:m.w}</span>
-            <span style="color:${m.w===name?'var(--blue)':'var(--red)'}">${m.w===name?'+':''}${m.diff}</span>
+            <span style="font-weight:900; color:${m.w===name?'var(--blue)':'var(--red)'}">${m.w===name?'+':''}${m.diff}</span>
         </div>`).join('')}
     </div>`;
     document.getElementById('modalOverlay').classList.add('active');
 }
 
 function updateSelects() {
-    const o = players.map(p=>`<option value="${p.name}">${p.name}</option>`).sort().join('');
+    const sortedPlayers = [...players].sort((a,b) => a.name.localeCompare(b.name));
+    const o = sortedPlayers.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
     document.getElementById('wSel').innerHTML = '<option value="">Winner...</option>'+o;
     document.getElementById('lSel').innerHTML = '<option value="">Loser...</option>'+o;
 }
