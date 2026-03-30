@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GSS RANKING - PRO FIX</title>
+    <title>GSS RANKING - PRO</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -51,7 +51,7 @@
 </head>
 <body>
 
-<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">v15.1 FULL FIX</div></header>
+<header><div class="logo">GSS RANKING</div><div id="statusLabel" style="font-family:'Share Tech Mono'; font-size:10px; color:var(--muted)">SYSTEM ONLINE</div></header>
 
 <div id="filterArea" class="filter-section">
     <div class="filter-row" id="genderFilters">
@@ -60,7 +60,7 @@
         <div class="chip" onclick="setGender('Women', this)">Women</div>
     </div>
     <div class="filter-row" id="catFilters">
-        <div class="chip active" onclick="setCat('all', this)">All</div>
+        <div class="chip active" onclick="setCat('all', this)">All Categories</div>
         <div class="chip" onclick="setCat('U9', this)">U9</div><div class="chip" onclick="setCat('U12', this)">U12</div>
         <div class="chip" onclick="setCat('U15', this)">U15</div><div class="chip" onclick="setCat('U19', this)">U19</div>
         <div class="chip" onclick="setCat('Open', this)">Open</div>
@@ -85,23 +85,23 @@
 <div id="pg-events" class="page"><div id="eventList"></div></div>
 <div id="pg-coach" class="page">
     <div id="adminView" style="display:none; padding: 20px;">
-        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">RECORD MATCH</div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">MATCH RECORD</div>
         <select id="wSel" class="wtt-select"></select>
         <select id="lSel" class="wtt-select"></select>
-        <button onclick="saveMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900; margin-bottom:30px;">SAVE SCORE</button>
+        <button onclick="saveMatch()" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900; margin-bottom:30px;">SAVE RESULT</button>
 
-        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">CREATE EVENT</div>
-        <input type="text" id="evName" class="wtt-input" placeholder="Event Name">
+        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">ADD NEW EVENT</div>
+        <input type="text" id="evName" class="wtt-input" placeholder="Event Name (e.g. MSSPP U12 Selection)">
         <input type="date" id="evDate" class="wtt-input">
-        <button onclick="createEvent()" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900; margin-bottom:30px;">ADD EVENT</button>
+        <button onclick="createEvent()" style="width:100%; background:var(--blue); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900; margin-bottom:30px;">CREATE EVENT</button>
 
-        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">NEW ATHLETE</div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:10px;">ADD NEW ATHLETE</div>
         <input type="text" id="newName" class="wtt-input" placeholder="Full Name">
         <select id="newGender" class="wtt-select"><option value="Men">Men</option><option value="Women">Women</option></select>
         <select id="newCat" class="wtt-select"><option value="Open">Open</option><option value="U19">U19</option><option value="U15">U15</option><option value="U12">U12</option><option value="U9">U9</option></select>
-        <button onclick="createPlayer()" style="width:100%; background:var(--text); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900;">CREATE PROFILE</button>
+        <button onclick="createPlayer()" style="width:100%; background:var(--text); color:#000; border:none; padding:15px; border-radius:10px; font-weight:900;">CREATE PLAYER</button>
         
-        <div style="font-size:11px; color:var(--muted); margin:20px 0 10px;">ATHLETE LIST (CLICK TO EDIT)</div>
+        <div style="font-size:11px; color:var(--muted); margin:25px 0 10px;">ATHLETE LIST (CLICK TO EDIT)</div>
         <div id="adminPlayerList"></div>
     </div>
 </div>
@@ -134,10 +134,7 @@ function init() {
         players = s.val() ? Object.values(s.val()) : []; 
         renderRanking(); updateSelects(); renderAdminList(); 
     });
-    db.ref('logs').on('value', s => { 
-        const val = s.val();
-        logs = val ? Object.values(val) : []; 
-    });
+    db.ref('logs').on('value', s => { logs = s.val() ? Object.values(s.val()) : []; });
     db.ref('events').on('value', s => { 
         const val = s.val();
         events = val ? Object.entries(val).map(([id, d]) => ({id, ...d})) : []; 
@@ -145,53 +142,71 @@ function init() {
     });
 }
 
-// --- FILTER ---
-function setGender(v, el) { curG = v; document.querySelectorAll('#genderFilters .chip').forEach(c => c.classList.toggle('active', c === el)); renderRanking(); }
-function setCat(v, el) { curC = v; document.querySelectorAll('#catFilters .chip').forEach(c => c.classList.toggle('active', c === el)); renderRanking(); }
-
+// --- RENDERING ---
 function renderRanking() {
-    let list = players.filter(p => (curG==='all' || p.gender===curG) && (curC==='all' || p.category===curC)).sort((a,b)=>b.rating-a.rating);
+    let list = players.filter(p => (curG==='all' || (p.gender||'Men')===curG) && (curC==='all' || (p.category||'Open')===curC)).sort((a,b)=>b.rating-a.rating);
     document.getElementById('rankList').innerHTML = list.map((p,i)=>`
         <div class="rank-card" onclick="showDetail('${p.name}')">
             <div class="rank-num ${i<3?'top3':''}">${i+1}</div>
             <div><div style="font-weight:700">${p.name}</div><div style="font-size:10px; color:var(--muted)">${p.gender||'Men'} | ${p.category||'Open'}</div></div>
             <div class="r-pts">${Math.round(p.rating)}</div>
         </div>
-    `).join('') || '<div style="text-align:center; padding:50px; color:var(--muted)">No players.</div>';
+    `).join('') || '<div style="text-align:center; padding:50px; color:var(--muted)">No athletes found.</div>';
 }
 
 function renderEvents() {
-    // 修复点：即使数据不完整也确保能渲染，防止页面空白
-    const listHtml = events.slice().reverse().map(e => `
-        <div class="rank-card">
+    document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
+        <div class="rank-card" onclick="showEventDetail('${e.id}')">
             <div>
                 <div style="color:var(--blue); font-size:10px; font-family:'Share Tech Mono'">${e.date || 'TBA'}</div>
-                <div style="font-weight:900; font-size:18px">${e.name || 'Unnamed Event'}</div>
+                <div style="font-weight:900; font-size:18px">${e.name}</div>
             </div>
-            <div style="margin-left:auto; display:flex; gap:10px;">
-                ${isCoach ? `<span style="color:var(--red); font-size:12px" onclick="if(confirm('Delete?')) db.ref('events/${e.id}').remove()">DEL</span>` : ''}
-                <span style="color:var(--muted)">→</span>
-            </div>
+            <div style="margin-left:auto; color:var(--muted)">→</div>
         </div>
-    `).join('');
-    document.getElementById('eventList').innerHTML = listHtml || '<div style="text-align:center; padding:50px; color:var(--muted)">No Events.</div>';
+    `).join('') || '<div style="text-align:center; padding:50px; color:var(--muted)">No events scheduled.</div>';
 }
 
-// --- ADMIN CREATE EVENT ---
+function showEventDetail(id) {
+    const e = events.find(x => x.id === id);
+    document.getElementById('modalBody').innerHTML = `
+        <div style="padding:30px">
+            <div style="font-size:10px; color:var(--blue); letter-spacing:2px">EVENT DETAILS</div>
+            <div style="font-size:28px; font-weight:900; margin:10px 0">${e.name}</div>
+            <div style="background:var(--line); padding:15px; border-radius:10px; margin-bottom:20px">
+                <div style="font-size:12px; color:var(--muted)">DATE</div>
+                <div style="font-weight:700">${e.date || 'To be announced'}</div>
+            </div>
+            <div style="font-size:11px; color:var(--muted)">Status: Ongoing System Training</div>
+            ${isCoach ? `<button onclick="deleteEvent('${e.id}')" style="margin-top:30px; width:100%; background:none; border:1px solid var(--red); color:var(--red); padding:12px; border-radius:8px; font-weight:700;">DELETE EVENT</button>` : ''}
+        </div>
+    `;
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+// --- ADMIN ACTIONS ---
 function createEvent() {
     const n = document.getElementById('evName').value.trim();
     const d = document.getElementById('evDate').value;
-    if(!n) return;
-    db.ref('events').push({ name: n, date: d });
-    document.getElementById('evName').value = ""; toast("EVENT ADDED");
+    if(!n) return toast("Enter event name");
+    db.ref('events').push({ name: n, date: d }).then(() => {
+        document.getElementById('evName').value = "";
+        toast("EVENT CREATED");
+    });
 }
 
-// --- ADMIN EDIT PLAYER ---
+function deleteEvent(id) {
+    if(confirm('Delete this event?')) {
+        db.ref('events/' + id).remove();
+        closeModal();
+        toast("EVENT REMOVED");
+    }
+}
+
 function editPlayer(name) {
     const p = players.find(x => x.name === name);
-    let html = `
+    document.getElementById('modalBody').innerHTML = `
         <div style="padding:25px;">
-            <div style="font-weight:900; margin-bottom:15px; color:var(--blue)">EDIT PLAYER: ${name}</div>
+            <div style="font-weight:900; margin-bottom:20px; color:var(--blue)">EDIT ATHLETE</div>
             <div style="font-size:10px; color:var(--muted)">NAME</div>
             <input type="text" id="editName" class="wtt-input" value="${p.name}">
             <div style="font-size:10px; color:var(--muted)">GENDER</div>
@@ -201,15 +216,14 @@ function editPlayer(name) {
             </select>
             <div style="font-size:10px; color:var(--muted)">CATEGORY</div>
             <select id="editCat" class="wtt-select">
-                ${['Open','U19','U15','U12','U9'].map(c=>`<option value="${c}" ${p.category===c?'selected':''}>${c}</option>`).join('')}
+                ${['Open','U19','U15','U12','U9'].map(c=>`<option value="${c}" ${(p.category||'Open')===c?'selected':''}>${c}</option>`).join('')}
             </select>
-            <div style="font-size:10px; color:var(--muted)">RATING (ELO)</div>
+            <div style="font-size:10px; color:var(--muted)">MANUAL RATING</div>
             <input type="number" id="editRating" class="wtt-input" value="${Math.round(p.rating)}">
-            <button onclick="updatePlayer('${name.replace(/\./g,'_')}')" style="width:100%; background:var(--blue); border:none; padding:15px; border-radius:10px; font-weight:900;">UPDATE PROFILE</button>
-            <button onclick="if(confirm('Delete Player?')) { db.ref('players/${name.replace(/\./g,'_')}').remove(); closeModal(); }" style="width:100%; background:none; border:1px solid var(--red); color:var(--red); padding:12px; border-radius:10px; margin-top:10px; font-weight:700;">DELETE PLAYER</button>
+            <button onclick="updatePlayer('${name.replace(/\./g,'_')}')" style="width:100%; background:var(--blue); border:none; padding:15px; border-radius:10px; font-weight:900; margin-top:10px;">UPDATE PROFILE</button>
+            <button onclick="deletePlayer('${name.replace(/\./g,'_')}')" style="width:100%; background:none; border:1px solid var(--red); color:var(--red); padding:12px; border-radius:10px; margin-top:10px; font-weight:700;">DELETE ATHLETE</button>
         </div>
     `;
-    document.getElementById('modalBody').innerHTML = html;
     document.getElementById('modalOverlay').classList.add('active');
 }
 
@@ -221,12 +235,22 @@ function updatePlayer(oldKey) {
         category: document.getElementById('editCat').value,
         rating: parseFloat(document.getElementById('editRating').value)
     };
-    if(newName.replace(/\./g,'_') !== oldKey) { db.ref('players/' + oldKey).remove(); }
+    if(newName.replace(/\./g,'_') !== oldKey) db.ref('players/' + oldKey).remove();
     db.ref('players/' + newName.replace(/\./g,'_')).update(data);
-    closeModal(); toast("PLAYER UPDATED");
+    closeModal(); toast("UPDATED");
 }
 
-// --- CORE ---
+function deletePlayer(key) {
+    if(confirm('Delete player forever?')) {
+        db.ref('players/' + key).remove();
+        closeModal(); toast("DELETED");
+    }
+}
+
+// --- UTILS ---
+function setGender(v, el) { curG = v; document.querySelectorAll('#genderFilters .chip').forEach(c => c.classList.toggle('active', c === el)); renderRanking(); }
+function setCat(v, el) { curC = v; document.querySelectorAll('#catFilters .chip').forEach(c => c.classList.toggle('active', c === el)); renderRanking(); }
+
 function tab(id, el) {
     document.querySelectorAll('.page, .nav-tab').forEach(x => x.classList.remove('active'));
     document.getElementById('pg-'+id).classList.add('active'); el.classList.add('active');
@@ -235,7 +259,7 @@ function tab(id, el) {
 }
 
 function pressKey(n) {
-    if(pin.length<4) { pin+=n; dots(); if(pin==="8888") { isCoach=true; document.getElementById('adminAuth').style.display='none'; document.getElementById('adminView').style.display='block'; renderEvents(); } else if(pin.length===4) { toast("WRONG"); pin=""; dots(); } }
+    if(pin.length<4) { pin+=n; dots(); if(pin==="8888") { isCoach=true; document.getElementById('adminAuth').style.display='none'; document.getElementById('adminView').style.display='block'; } else if(pin.length===4) { toast("WRONG"); pin=""; dots(); } }
 }
 function dots() { document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled', i<pin.length)); }
 function cancelAdmin() { document.getElementById('adminAuth').style.display='none'; tab('ranking', document.querySelector('.nav-tab')); }
@@ -250,20 +274,20 @@ function createPlayer() {
 
 function saveMatch() {
     const wn=document.getElementById('wSel').value, ln=document.getElementById('lSel').value;
-    if(!wn || !ln || wn===ln) return toast("ERROR");
+    if(!wn || !ln || wn===ln) return toast("SELECT PLAYERS");
     const w=players.find(p=>p.name===wn), l=players.find(p=>p.name===ln);
     const diff = Math.round(32 * (1 - (1 / (1 + Math.pow(10, (l.rating-w.rating)/400)))));
     db.ref('players/'+wn.replace(/\./g,'_')).update({rating:w.rating+diff});
     db.ref('players/'+ln.replace(/\./g,'_')).update({rating:l.rating-diff});
     db.ref('logs').push({w:wn, l:ln, diff, ts:Date.now()});
-    toast("SAVED");
+    toast("MATCH SAVED");
 }
 
 function renderAdminList() {
     document.getElementById('adminPlayerList').innerHTML = players.map(p => `
         <div onclick="editPlayer('${p.name}')" style="display:flex; justify-content:space-between; padding:12px; background:var(--card); margin-bottom:8px; border-radius:10px; font-size:13px; border:1px solid var(--line);">
             <span>${p.name} <small style="color:var(--muted)">(${p.category || 'Open'})</small></span>
-            <span style="color:var(--blue)">EDIT</span>
+            <span style="color:var(--blue); font-weight:700">EDIT</span>
         </div>
     `).join('');
 }
@@ -271,25 +295,26 @@ function renderAdminList() {
 function showDetail(name) {
     const p = players.find(x => x.name === name);
     const pLogs = logs.filter(l => l.w === name || l.l === name).reverse().slice(0,8);
-    document.getElementById('modalBody').innerHTML = `<div style="padding:30px">
-        <div style="font-size:28px; font-weight:900">${name}</div>
-        <div style="color:var(--blue); font-size:12px; margin-bottom:20px">${p.gender||'Men'} | ${p.category||'Open'}</div>
-        <div style="background:var(--line); padding:20px; border-radius:15px; text-align:center; margin-bottom:20px">
-            <div style="font-size:32px; font-weight:900; color:var(--blue)">${Math.round(p.rating)}</div>
-            <div style="font-size:10px; color:var(--muted)">CURRENT ELO</div>
-        </div>
-        <div style="font-size:10px; color:var(--muted); margin-bottom:10px">RECENT MATCHES</div>
-        ${pLogs.map(m=>`<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05)">
-            <span>vs ${m.w===name?m.l:m.w}</span>
-            <span style="font-weight:900; color:${m.w===name?'var(--blue)':'var(--red)'}">${m.w===name?'+':''}${m.diff}</span>
-        </div>`).join('')}
-    </div>`;
+    document.getElementById('modalBody').innerHTML = `
+        <div style="padding:30px">
+            <div style="font-size:32px; font-weight:900">${name}</div>
+            <div style="color:var(--blue); font-size:12px; margin-bottom:20px; font-weight:700">${p.gender||'Men'} | ${p.category||'Open'}</div>
+            <div style="background:var(--line); padding:20px; border-radius:15px; text-align:center; margin-bottom:20px">
+                <div style="font-size:35px; font-weight:900; color:var(--blue)">${Math.round(p.rating)}</div>
+                <div style="font-size:10px; color:var(--muted); letter-spacing:1px">CURRENT WORLD RATING</div>
+            </div>
+            <div style="font-size:11px; color:var(--muted); margin-bottom:10px">RECENT MATCH HISTORY</div>
+            ${pLogs.map(m=>`<div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05)">
+                <span style="font-weight:600">vs ${m.w===name?m.l:m.w}</span>
+                <span style="font-weight:900; color:${m.w===name?'var(--blue)':'var(--red)'}">${m.w===name?'+':''}${m.diff}</span>
+            </div>`).join('')}
+        </div>`;
     document.getElementById('modalOverlay').classList.add('active');
 }
 
 function updateSelects() {
-    const sortedPlayers = [...players].sort((a,b) => a.name.localeCompare(b.name));
-    const o = sortedPlayers.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
+    const sorted = [...players].sort((a,b) => a.name.localeCompare(b.name));
+    const o = sorted.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
     document.getElementById('wSel').innerHTML = '<option value="">Winner...</option>'+o;
     document.getElementById('lSel').innerHTML = '<option value="">Loser...</option>'+o;
 }
