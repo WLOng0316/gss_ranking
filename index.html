@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GSS RANKING PRO - MOBILE</title>
+    <title>GSS RANKING SYSTEM</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -23,11 +22,10 @@
             padding-top: calc(var(--safe-top) + 20px); padding-bottom: 120px; overflow-x: hidden;
         }
 
-        /* 顶部 Header 下沉一点，避开刘海 */
         header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; font-style: italic; letter-spacing: -1px; }
 
-        /* 筛选器 - 放在更靠近中间的位置 */
+        /* Ranking Filter Section */
         .filter-section { padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 15px; }
         .filter-row { display: flex; overflow-x: auto; padding: 5px 15px; gap: 10px; scrollbar-width: none; }
         .filter-row::-webkit-scrollbar { display: none; }
@@ -37,7 +35,12 @@
         }
         .chip.active { background: var(--blue); color: #000; border-color: var(--blue); }
 
-        /* 列表卡片优化 */
+        /* Event Internal Category Tabs */
+        .event-tabs { display: flex; background: #0a0e14; padding: 5px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--line); overflow-x: auto; gap: 5px; }
+        .e-tab { flex: 1; text-align: center; padding: 8px 12px; font-size: 11px; font-weight: 800; color: var(--muted); border-radius: 8px; white-space: nowrap; }
+        .e-tab.active { background: var(--line); color: var(--blue); }
+
+        /* Common Card Style */
         .rank-card { 
             background: var(--card); border-radius: 16px; padding: 18px; 
             margin: 0 15px 12px; display: flex; align-items: center; border: 1px solid var(--line);
@@ -46,7 +49,7 @@
         .top-rank { color: var(--blue); }
         .r-pts { margin-left: auto; font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: var(--blue); }
 
-        /* 移动端全屏弹窗优化 */
+        /* Full Screen Overlay */
         .modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.85); z-index: 1000; display: none; align-items: flex-end; 
@@ -61,13 +64,12 @@
         .modal-overlay.active { display: flex; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
 
-        /* 返回按钮 - 放在大拇指更容易够到的位置或顶部明显处 */
         .back-btn {
             display: flex; align-items: center; gap: 8px; color: var(--blue); 
             font-weight: 800; font-size: 14px; margin-bottom: 20px; padding: 10px 0; cursor: pointer;
         }
 
-        /* 仪表盘工具栏 */
+        /* Dashboard Tools */
         .event-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .tool-card { 
             background: var(--card); padding: 25px 15px; border-radius: 20px; 
@@ -75,36 +77,23 @@
         }
         .tool-card span { font-size: 30px; display: block; margin-bottom: 10px; }
 
-        /* 底部固定导航 - 针对手机优化 */
+        /* Bottom Nav */
         nav { 
             position: fixed; bottom: 0; width: 100%; background: rgba(18, 22, 31, 0.95); 
             display: flex; padding: 15px 0 calc(env(safe-area-inset-bottom) + 15px); 
             border-top: 1px solid var(--line); backdrop-filter: blur(15px); z-index: 900;
         }
-        .nav-tab { 
-            flex: 1; text-align: center; color: var(--muted); font-size: 11px; 
-            font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-        }
+        .nav-tab { flex: 1; text-align: center; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
         .nav-tab.active { color: var(--blue); }
 
-        /* PIN 键盘 */
+        /* Admin Keypad */
         .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; width: 100%; max-width: 300px; }
-        .key { 
-            aspect-ratio: 1; background: var(--card); border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 24px; font-weight: 700; border: 1px solid var(--line);
-        }
+        .key { aspect-ratio: 1; background: var(--card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; border: 1px solid var(--line); }
 
-        .wtt-input, .wtt-select { 
-            width: 100%; background: #1a1f29; border: 1px solid var(--line); 
-            color: #fff; padding: 16px; border-radius: 14px; margin-bottom: 12px; font-size: 16px; /* 16px防止iOS自动放大页面 */
-        }
+        /* Forms */
+        .wtt-input, .wtt-select { width: 100%; background: #1a1f29; border: 1px solid var(--line); color: #fff; padding: 16px; border-radius: 14px; margin-bottom: 12px; font-size: 16px; }
         
-        .toast { 
-            position: fixed; top: 60px; left: 50%; transform: translateX(-50%); 
-            background: var(--blue); color: #000; padding: 12px 25px; border-radius: 30px; 
-            font-weight: 900; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 2000; 
-        }
+        .toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #000; padding: 12px 25px; border-radius: 30px; font-weight: 900; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 2000; pointer-events: none; }
         .toast.show { opacity: 1; }
 
         .page { display: none; }
@@ -115,7 +104,6 @@
 
 <header>
     <div class="logo">GSS <span style="color:var(--blue)">RANK</span></div>
-    <div style="font-size: 10px; color: var(--muted); font-family: monospace;">v1.9 MOBILE-CORE</div>
 </header>
 
 <div id="pg-ranking" class="page active">
@@ -136,13 +124,13 @@
 </div>
 
 <div id="pg-events" class="page">
-    <div style="padding: 10px 15px; font-weight: 900; font-size: 20px; color: var(--blue);">ACTIVE TOURNAMENTS</div>
+    <div style="padding: 10px 15px; font-weight: 900; font-size: 20px; color: var(--blue);">TOURNAMENTS</div>
     <div id="eventList"></div>
 </div>
 
 <div id="pg-coach" class="page">
     <div id="adminAuth" style="padding: 40px 20px; display: flex; flex-direction: column; align-items: center;">
-        <div style="margin-bottom: 20px; font-weight: 900; color: var(--muted);">ENTER PIN</div>
+        <div style="margin-bottom: 20px; font-weight: 900; color: var(--muted);">COACH PIN</div>
         <div id="pinDots" style="font-size: 30px; letter-spacing: 15px; color: var(--blue); height: 40px;">••••</div>
         <div class="keypad">
             <script>for(let i=1;i<=9;i++) document.write(`<div class="key" onclick="pressKey('${i}')">${i}</div>`);</script>
@@ -152,16 +140,13 @@
         </div>
     </div>
     <div id="adminView" style="display:none; padding: 20px;">
-        <div style="margin-bottom: 20px;">
-            <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">CREATE NEW EVENT</div>
-            <input type="text" id="evName" class="wtt-input" placeholder="Event Name (e.g. March Ranking)">
+        <div style="background:var(--card); padding:20px; border-radius:18px; margin-bottom:20px; border:1px solid var(--line);">
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px; font-weight: 800;">CREATE NEW EVENT</div>
+            <input type="text" id="evName" class="wtt-input" placeholder="Event Name">
             <input type="date" id="evDate" class="wtt-input">
             <button onclick="createEvent()" style="width:100%; background:var(--blue); border:none; padding:16px; border-radius:14px; font-weight:900;">LAUNCH EVENT</button>
         </div>
-        <div style="margin-top: 30px;">
-            <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">ATHLETE MASTER LIST</div>
-            <div id="adminPlayerList"></div>
-        </div>
+        <div id="adminPlayerList"></div>
     </div>
 </div>
 
@@ -180,7 +165,6 @@
 <div id="toast" class="toast"></div>
 
 <script>
-// Firebase Initialization
 const firebaseConfig = {
     apiKey: "AIzaSyA3YGcigMzcLmnVXE6LrSRQWZ8IP7TRQBU",
     authDomain: "gss-ranking.firebaseapp.com",
@@ -193,15 +177,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let players = [], logs = [], events = [], pin = "", isCoach = false;
-let curG = 'all', curC = 'all';
+let players = [], events = [], pin = "", isCoach = false;
+let curG = 'all', curC = 'all', curEventCat = 'Open';
 
 function init() {
-    db.ref('players').on('value', s => { 
-        players = s.val() ? Object.values(s.val()) : []; 
-        renderRanking(); renderAdminList(); 
-    });
-    db.ref('logs').on('value', s => { logs = s.val() ? Object.values(s.val()) : []; });
+    db.ref('players').on('value', s => { players = s.val() ? Object.values(s.val()) : []; renderRanking(); renderAdminList(); });
     db.ref('events').on('value', s => { 
         const val = s.val();
         events = val ? Object.entries(val).map(([id, d]) => ({id, ...d})) : []; 
@@ -209,55 +189,46 @@ function init() {
     });
 }
 
-// --- Navigation ---
 function tab(id, el) {
     document.querySelectorAll('.page, .nav-tab').forEach(x => x.classList.remove('active'));
     document.getElementById('pg-'+id).classList.add('active'); el.classList.add('active');
-    if(id === 'coach' && isCoach) {
-        document.getElementById('adminAuth').style.display = 'none';
-        document.getElementById('adminView').style.display = 'block';
-    }
 }
 
-// --- Ranking Logic ---
 function renderRanking() {
     let list = players.filter(p => (curG==='all' || (p.gender||'Men')===curG) && (curC==='all' || (p.category||'Open')===curC)).sort((a,b)=>b.rating-a.rating);
     document.getElementById('rankList').innerHTML = list.map((p,i)=>`
-        <div class="rank-card" onclick="showPlayerDetail('${p.name}')">
+        <div class="rank-card">
             <div class="rank-num ${i<3?'top-rank':''}">${i+1}</div>
-            <div>
-                <div style="font-weight:700; font-size:16px;">${p.name}</div>
-                <div style="font-size:11px; color:var(--muted)">${p.category || 'Open'}</div>
-            </div>
+            <div><div style="font-weight:700; font-size:16px;">${p.name}</div><div style="font-size:11px; color:var(--muted)">${p.category || 'Open'}</div></div>
             <div class="r-pts">${Math.round(p.rating)}</div>
         </div>
     `).join('');
 }
 
-// --- Event Logic (Mobile Dashboard) ---
 function renderEvents() {
     document.getElementById('eventList').innerHTML = events.slice().reverse().map(e => `
         <div class="rank-card" onclick="openEventDashboard('${e.id}')">
             <div style="width:100%">
                 <div style="font-size:11px; color:var(--blue); font-weight:800;">${e.date || 'UPCOMING'}</div>
                 <div style="font-size:20px; font-weight:900; margin:4px 0;">${e.name}</div>
-                <div style="font-size:11px; color:var(--muted)">Registered: ${e.regs ? Object.keys(e.regs).length : 0} Athletes</div>
+                <div style="font-size:11px; color:var(--muted)">Total: ${e.regs ? Object.keys(e.regs).length : 0} Athletes</div>
             </div>
             <div style="color:var(--blue); font-weight:900;">➔</div>
         </div>
     `).join('');
 }
 
+// --- EVENT DASHBOARD ---
 function openEventDashboard(id) {
     const e = events.find(x => x.id === id);
     document.getElementById('modalBody').innerHTML = `
-        <div class="back-btn" onclick="closeModal()">❮ BACK TO TOURNAMENTS</div>
-        <div style="font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 5px;">${e.name}</div>
-        <div style="font-size: 14px; color: var(--muted); margin-bottom: 25px;">Event Dashboard</div>
+        <div class="back-btn" onclick="closeModal()">❮ BACK</div>
+        <div style="font-size: 32px; font-weight: 900;">${e.name}</div>
+        <div style="font-size: 14px; color: var(--muted); margin-bottom: 25px;">Management Hub</div>
 
         <div class="event-grid">
             <div class="tool-card" onclick="showEntryList('${id}')">
-                <span>👥</span><div style="font-weight:800; font-size:13px;">ATHLETES</div>
+                <span>👥</span><div style="font-weight:800; font-size:13px;">ENTRY LIST</div>
             </div>
             <div class="tool-card" onclick="showMatchCenter('${id}')">
                 <span>🏓</span><div style="font-weight:800; font-size:13px;">MATCH CENTER</div>
@@ -265,15 +236,14 @@ function openEventDashboard(id) {
         </div>
 
         <div style="background:var(--card); padding:20px; border-radius:20px; border:1px solid var(--line);">
-            <div style="font-size:12px; font-weight:800; margin-bottom:12px; color:var(--muted)">REGISTER FOR THIS EVENT</div>
+            <div style="font-size:12px; font-weight:800; margin-bottom:12px; color:var(--muted)">QUICK REGISTRATION</div>
             <select id="quickReg" class="wtt-select">
-                <option value="">Choose Athlete...</option>
-                ${players.sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.name}">${p.name}</option>`).join('')}
+                <option value="">Select Athlete...</option>
+                ${players.sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<option value="${p.name}">${p.name} (${p.category})</option>`).join('')}
             </select>
-            <button onclick="regPlayer('${id}')" style="width:100%; background:var(--blue); border:none; padding:16px; border-radius:14px; font-weight:900; color:#000;">CONFIRM REGISTRATION</button>
+            <button onclick="regPlayer('${id}')" style="width:100%; background:var(--blue); border:none; padding:16px; border-radius:14px; font-weight:900; color:#000;">JOIN EVENT</button>
         </div>
-        
-        ${isCoach ? `<button onclick="deleteEvent('${id}')" style="width:100%; margin-top:20px; background:none; border:1px solid var(--red); color:var(--red); padding:12px; border-radius:12px; font-weight:700; font-size:12px;">ADMIN: CANCEL EVENT</button>` : ''}
+        ${isCoach ? `<button onclick="deleteEvent('${id}')" style="width:100%; margin-top:20px; background:none; border:1px solid var(--red); color:var(--red); padding:12px; border-radius:12px; font-size:12px; font-weight:700;">DELETE TOURNAMENT</button>` : ''}
     `;
     document.getElementById('modalOverlay').classList.add('active');
 }
@@ -281,16 +251,28 @@ function openEventDashboard(id) {
 function showEntryList(id) {
     const e = events.find(x => x.id === id);
     const regs = e.regs ? Object.values(e.regs) : [];
+    const filtered = regs.filter(name => {
+        const p = players.find(x => x.name === name);
+        return p && p.category === curEventCat;
+    });
+
     document.getElementById('modalBody').innerHTML = `
-        <div class="back-btn" onclick="openEventDashboard('${id}')">❮ BACK TO DASHBOARD</div>
-        <div style="font-size: 24px; font-weight: 900; margin-bottom: 20px;">ATHLETE LIST (${regs.length})</div>
+        <div class="back-btn" onclick="openEventDashboard('${id}')">❮ DASHBOARD</div>
+        <div style="font-size: 24px; font-weight: 900; margin-bottom: 20px;">ENTRY LIST</div>
+        
+        <div class="event-tabs">
+            ${['Open','U19','U15','U12','U9'].map(c => `
+                <div class="e-tab ${curEventCat===c?'active':''}" onclick="curEventCat='${c}'; showEntryList('${id}')">${c}</div>
+            `).join('')}
+        </div>
+
         <div style="display:flex; flex-direction:column; gap:8px;">
-            ${regs.length ? regs.map(name => `
-                <div style="background:var(--card); padding:15px; border-radius:12px; border:1px solid var(--line); display:flex; justify-content:space-between">
+            ${filtered.length ? filtered.map(name => `
+                <div style="background:var(--card); padding:15px; border-radius:12px; border:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:700">${name}</span>
-                    <span style="color:var(--muted); font-size:12px">Registered</span>
+                    <span style="color:var(--blue); font-size:10px; font-weight:800; border:1px solid var(--blue); padding:2px 6px; border-radius:4px;">READY</span>
                 </div>
-            `).join('') : '<div style="color:var(--muted); text-align:center; padding:40px;">No one registered yet.</div>'}
+            `).join('') : `<div style="color:var(--muted); text-align:center; padding:40px;">No players in ${curEventCat}</div>`}
         </div>
     `;
 }
@@ -298,18 +280,28 @@ function showEntryList(id) {
 function showMatchCenter(id) {
     const e = events.find(x => x.id === id);
     document.getElementById('modalBody').innerHTML = `
-        <div class="back-btn" onclick="openEventDashboard('${id}')">❮ BACK TO DASHBOARD</div>
+        <div class="back-btn" onclick="openEventDashboard('${id}')">❮ DASHBOARD</div>
         <div style="font-size: 24px; font-weight: 900; margin-bottom: 20px;">MATCH CENTER</div>
+        
+        <div class="event-tabs">
+            ${['Open','U19','U15','U12','U9'].map(c => `
+                <div class="e-tab ${curEventCat===c?'active':''}" onclick="curEventCat='${c}'; showMatchCenter('${id}')">${c}</div>
+            `).join('')}
+        </div>
+
         <div id="fixtures">
-            ${e.fixtures ? e.fixtures.map(f => `
+            ${e.fixtures ? e.fixtures.map(f => {
+                const p1 = players.find(x => x.name === f.p1);
+                if (p1 && p1.category !== curEventCat) return '';
+                return `
                 <div style="background:var(--card); padding:20px; border-radius:16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; border:1px solid var(--line);">
-                    <div style="width:40%; text-align:right; font-weight:700;">${f.p1}</div>
+                    <div style="width:42%; text-align:right; font-weight:700;">${f.p1}</div>
                     <div style="font-size:10px; font-weight:900; color:var(--muted); background:var(--line); padding:4px 8px; border-radius:5px;">VS</div>
-                    <div style="width:40%; text-align:left; font-weight:700;">${f.p2}</div>
-                </div>
-            `).join('') : `
+                    <div style="width:42%; text-align:left; font-weight:700;">${f.p2}</div>
+                </div>`;
+            }).join('') : `
                 <div style="text-align:center; padding:40px;">
-                    <div style="color:var(--muted); margin-bottom:20px;">No fixtures generated.</div>
+                    <div style="color:var(--muted); margin-bottom:20px;">Draw not generated.</div>
                     ${isCoach ? `<button onclick="makeFixtures('${id}')" style="background:var(--blue); color:#000; border:none; padding:14px 30px; border-radius:30px; font-weight:900;">GENERATE DRAW</button>` : ''}
                 </div>
             `}
@@ -317,65 +309,49 @@ function showMatchCenter(id) {
     `;
 }
 
-// --- Coach Actions ---
+// --- LOGIC ---
 function pressKey(n) {
-    pin += n;
-    document.getElementById('pinDots').textContent = "•".repeat(pin.length);
-    if(pin === "8888") {
-        isCoach = true;
+    pin += n; document.getElementById('pinDots').textContent = "•".repeat(pin.length);
+    if(pin === "8888") { 
+        isCoach = true; 
         document.getElementById('adminAuth').style.display = 'none';
         document.getElementById('adminView').style.display = 'block';
-        toast("COACH ACCESS GRANTED");
-    } else if(pin.length >= 4) {
-        pin = "";
-        document.getElementById('pinDots').textContent = "••••";
-        toast("WRONG PIN");
+        toast("COACH ACCESS GRANTED"); 
+    } else if(pin.length >= 4) { 
+        pin = ""; document.getElementById('pinDots').textContent = "••••"; toast("WRONG PIN"); 
     }
 }
 
 function createEvent() {
     const name = document.getElementById('evName').value;
     const date = document.getElementById('evDate').value;
-    if(!name) return toast("Entry name!");
-    db.ref('events').push({ name, date }).then(() => {
-        toast("EVENT CREATED");
-        document.getElementById('evName').value = "";
-    });
+    if(!name) return toast("Name required!");
+    db.ref('events').push({ name, date }).then(() => { toast("EVENT CREATED"); document.getElementById('evName').value = ""; });
 }
 
 function makeFixtures(evId) {
     const e = events.find(x => x.id === evId);
     let regs = Object.values(e.regs).sort(() => Math.random() - 0.5);
     let fix = [];
-    for(let i=0; i<regs.length; i+=2) {
-        fix.push({ p1: regs[i], p2: regs[i+1] || "BYE" });
-    }
+    for(let i=0; i<regs.length; i+=2) { fix.push({ p1: regs[i], p2: regs[i+1] || "BYE" }); }
     db.ref(`events/${evId}/fixtures`).set(fix).then(() => showMatchCenter(evId));
 }
 
 function regPlayer(evId) {
     const name = document.getElementById('quickReg').value;
-    if(!name) return toast("Select a player!");
-    db.ref(`events/${evId}/regs`).push(name).then(() => {
-        toast("REGISTERED!");
-        openEventDashboard(evId);
-    });
+    if(!name) return toast("Select player!");
+    db.ref(`events/${evId}/regs`).push(name).then(() => { toast("SUCCESS!"); openEventDashboard(evId); });
 }
 
+function deleteEvent(id) { if(confirm("Delete this?")) db.ref('events/'+id).remove().then(()=>closeModal()); }
 function renderAdminList() {
     document.getElementById('adminPlayerList').innerHTML = players.map(p => `
-        <div style="padding:12px; background:var(--card); margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--line);">
-            <span>${p.name}</span>
-            <button onclick="editP('${p.name}')" style="background:none; border:1px solid var(--blue); color:var(--blue); padding:5px 12px; border-radius:8px; font-size:12px;">EDIT</button>
+        <div style="padding:15px; background:var(--card); margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between; border:1px solid var(--line);">
+            <span>${p.name}</span><span style="color:var(--blue)">${Math.round(p.rating)}</span>
         </div>
     `).join('');
 }
 
-function deleteEvent(id) {
-    if(confirm("Confirm delete event?")) db.ref('events/'+id).remove().then(() => closeModal());
-}
-
-// --- Utils ---
 function setG(v, el) { curG = v; document.querySelectorAll('#pg-ranking .filter-row:first-child .chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderRanking(); }
 function setC(v, el) { curC = v; document.querySelectorAll('#pg-ranking .filter-row:last-child .chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderRanking(); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
